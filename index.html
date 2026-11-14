@@ -1,0 +1,301 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Los latidos de la Tierra</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100%;
+            min-height: 100vh;
+            overflow: hidden;
+            background: radial-gradient(circle at center, #071b35 0%, #020711 65%, #000 100%);
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .contenedor {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 15px;
+        }
+
+        header {
+            position: absolute;
+            top: 25px;
+            width: 100%;
+            text-align: center;
+            z-index: 2;
+        }
+
+        h1 {
+            font-family: 'Teko', sans-serif;
+            font-size: clamp(38px, 6vw, 65px);
+            letter-spacing: 4px;
+            color: #fff;
+            text-shadow: 0 0 18px #168bff;
+        }
+
+        header p {
+            font-size: clamp(10px, 2vw, 14px);
+            letter-spacing: 3px;
+            color: #a9d9ff;
+        }
+
+        #tierra {
+            width: min(65vw, 520px);
+            height: min(65vw, 520px);
+            max-height: 55vh;
+            margin-top: 45px;
+            position: relative;
+            z-index: 1;
+        }
+
+        #tierra canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .boton-iniciar {
+            margin-top: 15px;
+            padding: 15px 55px;
+            border: 1px solid #45baff;
+            border-radius: 40px;
+            background: linear-gradient(135deg, #0875c9, #003b78);
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 4px;
+            cursor: pointer;
+            box-shadow: 0 0 15px #087bdc, inset 0 0 10px #42baff55;
+            transition: .3s ease;
+            z-index: 2;
+        }
+
+        .boton-iniciar:hover {
+            transform: scale(1.08);
+            background: linear-gradient(135deg, #159dff, #0753a0);
+            box-shadow: 0 0 30px #159dff;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                top: 35px;
+            }
+
+            #tierra {
+                width: 90vw;
+                height: 90vw;
+                max-height: 48vh;
+                margin-top: 35px;
+            }
+
+            .boton-iniciar {
+                margin-top: 20px;
+                padding: 13px 40px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="contenedor">
+
+        <header>
+            <h1>LOS LATIDOS DE LA TIERRA</h1>
+            <p>UN PLANETA, MILLONES DE HISTORIAS</p>
+        </header>
+
+        <div id="tierra"></div>
+
+        <button class="boton-iniciar" onclick="iniciar()">
+            INICIAR
+        </button>
+
+    </div>
+
+    <script type="module">
+        import * as THREE from 'https://esm.sh/three@0.160.1';
+
+        const contenedor = document.getElementById('tierra');
+
+        const escena = new THREE.Scene();
+
+        const camara = new THREE.PerspectiveCamera(
+            45,
+            1,
+            0.1,
+            100
+        );
+
+        camara.position.z = 3.4;
+
+        const renderizador = new THREE.WebGLRenderer({
+            antialias: true,
+            alpha: true
+        });
+
+        renderizador.setPixelRatio(
+            Math.min(window.devicePixelRatio, 2)
+        );
+
+        contenedor.appendChild(renderizador.domElement);
+
+        // Iluminación espacial
+        escena.add(new THREE.AmbientLight(0xffffff, 0.65));
+
+        const luzSolar = new THREE.DirectionalLight(0xffffff, 2.8);
+        luzSolar.position.set(-4, 2, 5);
+        escena.add(luzSolar);
+
+        // Grupo del planeta
+        const planetaGrupo = new THREE.Group();
+        escena.add(planetaGrupo);
+
+        const cargador = new THREE.TextureLoader();
+
+        // Textura de la Tierra
+        cargador.load(
+            'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
+            (textura) => {
+
+                textura.colorSpace = THREE.SRGBColorSpace;
+
+                const geometria = new THREE.SphereGeometry(1, 128, 128);
+
+                const material = new THREE.MeshPhongMaterial({
+                    map: textura,
+                    shininess: 18,
+                    specular: new THREE.Color(0x333333)
+                });
+
+                const tierra = new THREE.Mesh(geometria, material);
+                planetaGrupo.add(tierra);
+
+                // Capa de nubes
+                cargador.load(
+                    'https://threejs.org/examples/textures/planets/earth_clouds_1024.png',
+                    (texturaNubes) => {
+
+                        const nubes = new THREE.Mesh(
+                            new THREE.SphereGeometry(1.008, 128, 128),
+                            new THREE.MeshPhongMaterial({
+                                map: texturaNubes,
+                                transparent: true,
+                                opacity: 0.35,
+                                depthWrite: false
+                            })
+                        );
+
+                        planetaGrupo.add(nubes);
+
+                        function girarNubes() {
+                            nubes.rotation.y += 0.00035;
+                            requestAnimationFrame(girarNubes);
+                        }
+
+                        girarNubes();
+                    }
+                );
+
+                // Atmósfera
+                const atmosfera = new THREE.Mesh(
+                    new THREE.SphereGeometry(1.045, 128, 128),
+                    new THREE.MeshBasicMaterial({
+                        color: 0x168bff,
+                        transparent: true,
+                        opacity: 0.13,
+                        side: THREE.BackSide
+                    })
+                );
+
+                planetaGrupo.add(atmosfera);
+
+                // Estrellas
+                const posiciones = [];
+
+                for (let i = 0; i < 3000; i++) {
+                    const x = (Math.random() - 0.5) * 100;
+                    const y = (Math.random() - 0.5) * 100;
+                    const z = (Math.random() - 0.5) * 100;
+
+                    if (Math.sqrt(x*x + y*y + z*z) > 5) {
+                        posiciones.push(x, y, z);
+                    }
+                }
+
+                const geometriaEstrellas = new THREE.BufferGeometry();
+
+                geometriaEstrellas.setAttribute(
+                    'position',
+                    new THREE.Float32BufferAttribute(posiciones, 3)
+                );
+
+                const estrellas = new THREE.Points(
+                    geometriaEstrellas,
+                    new THREE.PointsMaterial({
+                        color: 0xffffff,
+                        size: 0.035,
+                        transparent: true,
+                        opacity: 0.8
+                    })
+                );
+
+                escena.add(estrellas);
+
+                // Animación principal
+                function animar() {
+                    requestAnimationFrame(animar);
+
+                    planetaGrupo.rotation.y += 0.0012;
+                    estrellas.rotation.y += 0.00004;
+
+                    renderizador.render(escena, camara);
+                }
+
+                animar();
+            }
+        );
+
+        // Ajustar tamaño
+        function ajustarPantalla() {
+            const ancho = contenedor.clientWidth;
+            const alto = contenedor.clientHeight;
+
+            camara.aspect = ancho / alto;
+            camara.updateProjectionMatrix();
+
+            renderizador.setSize(ancho, alto);
+        }
+
+        window.addEventListener('resize', ajustarPantalla);
+        ajustarPantalla();
+
+    </script>
+
+    <script>
+        function iniciar() {
+            window.location.href = "principal.html";
+        }
+    </script>
+
+</body>
+</html>
