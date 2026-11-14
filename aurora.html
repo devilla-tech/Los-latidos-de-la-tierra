@@ -7,9 +7,14 @@
 <title>Los Latidos de la Tierra | Tierra 3D y auroras</title>
 
 <style>
+* {
+    box-sizing: border-box;
+}
+
 html, body {
     margin: 0;
     width: 100%;
+    min-height: 100%;
     height: 100%;
     overflow: hidden;
     background: #05060d;
@@ -19,19 +24,78 @@ html, body {
 #scene {
     position: fixed;
     inset: 0;
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
     touch-action: none;
     cursor: grab;
 }
 
 #scene canvas {
     display: block;
+    width: 100%;
+    height: 100%;
+}
+
+#audioButton {
+    position: fixed;
+    z-index: 5;
+    left: 50%;
+    bottom: max(22px, env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    min-width: 190px;
+    max-width: calc(100vw - 32px);
+    padding: 14px 24px;
+    border: 1px solid rgba(125, 235, 255, .8);
+    border-radius: 999px;
+    background: rgba(5, 15, 35, .88);
+    color: #fff;
+    font: 700 15px/1.2 system-ui, sans-serif;
+    letter-spacing: .08em;
+    cursor: pointer;
+    box-shadow: 0 0 24px rgba(54, 211, 255, .25);
+    -webkit-tap-highlight-color: transparent;
+}
+
+#audioButton:active {
+    transform: translateX(-50%) scale(.97);
+}
+
+#audioHint {
+    position: fixed;
+    z-index: 4;
+    left: 50%;
+    bottom: max(82px, calc(env(safe-area-inset-bottom) + 72px));
+    transform: translateX(-50%);
+    width: min(90vw, 360px);
+    color: rgba(255,255,255,.78);
+    text-align: center;
+    font: 13px/1.4 system-ui, sans-serif;
+    text-shadow: 0 2px 8px #000;
+    pointer-events: none;
+}
+
+@media (max-width: 600px) {
+    #audioButton {
+        bottom: max(18px, env(safe-area-inset-bottom));
+        min-width: 180px;
+        padding: 13px 20px;
+        font-size: 14px;
+    }
+
+    #audioHint {
+        bottom: max(76px, calc(env(safe-area-inset-bottom) + 68px));
+        font-size: 12px;
+    }
 }
 </style>
 </head>
 
 <body>
 
-<div id="scene"></div>
+<div id="scene" aria-label="Planeta Tierra en 3D"></div>
+<p id="audioHint">Toca el botón para escuchar los sonidos de las auroras</p>
+<button id="audioButton" type="button">ACTIVAR SONIDO</button>
 
 <script type="module">
 
@@ -53,7 +117,7 @@ const renderer = new THREE.WebGLRenderer({
     alpha: false
 });
 
-renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.75;
@@ -499,8 +563,6 @@ canvas.addEventListener('wheel', e => {
 // SISTEMA DE SONIDO
 // =====================================
 
-// Frecuencias asociadas a los colores de la aurora.
-
 const bands = [
     { frequency: 130.81, height: .10 },
     { frequency: 196, height: .36 },
@@ -517,7 +579,9 @@ async function startAudio() {
 
             const Audio = window.AudioContext || window.webkitAudioContext;
 
-            if (!Audio) return;
+            if (!Audio) {
+                return false;
+            }
 
             audioContext = new Audio();
 
@@ -543,12 +607,15 @@ async function startAudio() {
             await audioContext.resume();
         }
 
+        return audioContext.state === 'running';
+
     } catch (error) {
 
         console.error(
             'No se pudo activar el audio de la aurora',
             error
         );
+        return false;
     }
 }
 
@@ -703,7 +770,36 @@ function pixelVolumes(frame) {
     );
 }
 
-// Activar sonido al tocar o hacer clic en el globo.
+// =====================================
+// BOTÓN PARA ACTIVAR EL SONIDO
+// =====================================
+
+const audioButton = document.querySelector('#audioButton');
+const audioHint = document.querySelector('#audioHint');
+
+audioButton.addEventListener('click', async () => {
+
+    const activated = await startAudio();
+
+    if (activated) {
+
+        audioButton.textContent = 'SONIDO ACTIVADO';
+
+        audioHint.textContent =
+            'Explora la Tierra: los colores de las auroras generan sonidos';
+
+        audioButton.setAttribute('aria-label', 'Sonido activado');
+
+    } else {
+
+        audioButton.textContent = 'TOCA PARA REINTENTAR';
+
+        audioHint.textContent =
+            'Si no escuchas nada, sube el volumen y revisa que el teléfono no esté en silencio';
+    }
+});
+
+// También permite activar el audio tocando el planeta.
 canvas.addEventListener('pointerup', startAudio);
 
 // =====================================
@@ -716,6 +812,15 @@ function resize() {
     const h = mount.clientHeight;
 
     camera.aspect = w / h;
+
+    // Aleja el planeta en pantallas verticales.
+    if (w < 600) {
+        distance = 4.8;
+    } else if (w < 900) {
+        distance = 4.1;
+    } else {
+        distance = 3.6;
+    }
 
     camera.updateProjectionMatrix();
 
