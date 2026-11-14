@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Los latidos de la Tierra</title>
+
+    <title>Los Latidos de la Tierra</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
 
@@ -15,53 +16,79 @@
             box-sizing: border-box;
         }
 
-        body {
+        html, body {
             width: 100%;
-            min-height: 100vh;
+            height: 100%;
             overflow: hidden;
-            background: radial-gradient(circle at center, #071b35 0%, #020711 65%, #000 100%);
+        }
+
+        body {
+            background: radial-gradient(
+                circle at center,
+                #071b35 0%,
+                #020711 65%,
+                #000 100%
+            );
+
             color: white;
             font-family: 'Montserrat', sans-serif;
         }
 
         .contenedor {
             width: 100%;
-            min-height: 100vh;
+            height: 100vh;
+            height: 100dvh;
+
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+
             position: relative;
-            padding: 15px;
+            padding: 20px;
         }
+
+        /* =================================
+           ENCABEZADO
+        ================================= */
 
         header {
             position: absolute;
-            top: 25px;
+            top: max(20px, env(safe-area-inset-top));
+            left: 0;
             width: 100%;
             text-align: center;
             z-index: 2;
+            padding: 0 12px;
         }
 
         h1 {
             font-family: 'Teko', sans-serif;
-            font-size: clamp(38px, 6vw, 65px);
-            letter-spacing: 4px;
+            font-size: clamp(30px, 6vw, 65px);
+            letter-spacing: clamp(2px, 0.5vw, 4px);
+            line-height: 1.1;
             color: #fff;
             text-shadow: 0 0 18px #168bff;
         }
 
         header p {
-            font-size: clamp(10px, 2vw, 14px);
-            letter-spacing: 3px;
+            font-size: clamp(9px, 1.8vw, 14px);
+            letter-spacing: clamp(1px, 0.5vw, 3px);
             color: #a9d9ff;
+            margin-top: 5px;
         }
 
+        /* =================================
+           PLANETA
+        ================================= */
+
         #tierra {
-            width: min(65vw, 520px);
-            height: min(65vw, 520px);
-            max-height: 55vh;
-            margin-top: 45px;
+            width: min(65vw, 520px, 48vh);
+            aspect-ratio: 1 / 1;
+            flex-shrink: 0;
+
+            margin-top: 35px;
+
             position: relative;
             z-index: 1;
         }
@@ -72,44 +99,128 @@
             display: block;
         }
 
+        /* =================================
+           BOTÓN INICIAR
+        ================================= */
+
         .boton-iniciar {
-            margin-top: 15px;
-            padding: 15px 55px;
+            margin-top: 20px;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 14px 45px;
+
             border: 1px solid #45baff;
             border-radius: 40px;
-            background: linear-gradient(135deg, #0875c9, #003b78);
+
+            background: linear-gradient(
+                135deg,
+                #0875c9,
+                #003b78
+            );
+
             color: white;
+            text-decoration: none;
+
             font-family: 'Montserrat', sans-serif;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             letter-spacing: 4px;
+
             cursor: pointer;
-            box-shadow: 0 0 15px #087bdc, inset 0 0 10px #42baff55;
+
+            box-shadow:
+                0 0 15px #087bdc,
+                inset 0 0 10px #42baff55;
+
             transition: .3s ease;
             z-index: 2;
         }
 
         .boton-iniciar:hover {
             transform: scale(1.08);
-            background: linear-gradient(135deg, #159dff, #0753a0);
+
+            background: linear-gradient(
+                135deg,
+                #159dff,
+                #0753a0
+            );
+
             box-shadow: 0 0 30px #159dff;
         }
 
+        /* =================================
+           CELULARES
+        ================================= */
+
         @media (max-width: 600px) {
+
+            .contenedor {
+                padding: 15px;
+            }
+
             header {
-                top: 35px;
+                top: max(25px, env(safe-area-inset-top));
+                padding: 0 8px;
+            }
+
+            h1 {
+                font-size: clamp(29px, 8vw, 42px);
+                letter-spacing: 2px;
+            }
+
+            header p {
+                font-size: 9px;
+                letter-spacing: 1.5px;
             }
 
             #tierra {
-                width: 90vw;
-                height: 90vw;
-                max-height: 48vh;
+                width: min(78vw, 42vh, 360px);
                 margin-top: 35px;
             }
 
             .boton-iniciar {
-                margin-top: 20px;
-                padding: 13px 40px;
+                margin-top: 18px;
+                padding: 13px 38px;
+                font-size: 13px;
+                letter-spacing: 3px;
+            }
+        }
+
+        /* =================================
+           CELULAR EN HORIZONTAL
+        ================================= */
+
+        @media (max-height: 500px) and (orientation: landscape) {
+
+            .contenedor {
+                justify-content: flex-end;
+                padding-bottom: 12px;
+            }
+
+            header {
+                top: 8px;
+            }
+
+            h1 {
+                font-size: 30px;
+            }
+
+            header p {
+                font-size: 9px;
+            }
+
+            #tierra {
+                width: min(55vh, 300px);
+                margin-top: 65px;
+            }
+
+            .boton-iniciar {
+                margin-top: 8px;
+                padding: 9px 30px;
+                font-size: 11px;
             }
         }
     </style>
@@ -126,13 +237,14 @@
 
         <div id="tierra"></div>
 
-        <button class="boton-iniciar" >
-            INICIAR<a href="aurora.html"></a>
-        </button>
+        <a class="boton-iniciar" href="aurora.html">
+            INICIAR
+        </a>
 
     </div>
 
     <script type="module">
+
         import * as THREE from 'https://esm.sh/three@0.160.1';
 
         const contenedor = document.getElementById('tierra');
@@ -154,32 +266,56 @@
         });
 
         renderizador.setPixelRatio(
-            Math.min(window.devicePixelRatio, 2)
+            Math.min(window.devicePixelRatio || 1, 1.5)
         );
+
+        renderizador.outputColorSpace = THREE.SRGBColorSpace;
 
         contenedor.appendChild(renderizador.domElement);
 
-        // Iluminación espacial
-        escena.add(new THREE.AmbientLight(0xffffff, 0.65));
+        // =================================
+        // ILUMINACIÓN ESPACIAL
+        // =================================
 
-        const luzSolar = new THREE.DirectionalLight(0xffffff, 2.8);
+        escena.add(
+            new THREE.AmbientLight(0xffffff, 0.65)
+        );
+
+        const luzSolar = new THREE.DirectionalLight(
+            0xffffff,
+            2.8
+        );
+
         luzSolar.position.set(-4, 2, 5);
+
         escena.add(luzSolar);
 
-        // Grupo del planeta
+        // =================================
+        // GRUPO DEL PLANETA
+        // =================================
+
         const planetaGrupo = new THREE.Group();
+
         escena.add(planetaGrupo);
 
         const cargador = new THREE.TextureLoader();
 
-        // Textura de la Tierra
+        // =================================
+        // TEXTURA DE LA TIERRA
+        // =================================
+
         cargador.load(
             'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
+
             (textura) => {
 
                 textura.colorSpace = THREE.SRGBColorSpace;
 
-                const geometria = new THREE.SphereGeometry(1, 128, 128);
+                const geometria = new THREE.SphereGeometry(
+                    1,
+                    128,
+                    128
+                );
 
                 const material = new THREE.MeshPhongMaterial({
                     map: textura,
@@ -187,16 +323,29 @@
                     specular: new THREE.Color(0x333333)
                 });
 
-                const tierra = new THREE.Mesh(geometria, material);
+                const tierra = new THREE.Mesh(
+                    geometria,
+                    material
+                );
+
                 planetaGrupo.add(tierra);
 
-                // Capa de nubes
+                // =================================
+                // CAPA DE NUBES
+                // =================================
+
                 cargador.load(
                     'https://threejs.org/examples/textures/planets/earth_clouds_1024.png',
+
                     (texturaNubes) => {
 
                         const nubes = new THREE.Mesh(
-                            new THREE.SphereGeometry(1.008, 128, 128),
+                            new THREE.SphereGeometry(
+                                1.008,
+                                128,
+                                128
+                            ),
+
                             new THREE.MeshPhongMaterial({
                                 map: texturaNubes,
                                 transparent: true,
@@ -207,18 +356,21 @@
 
                         planetaGrupo.add(nubes);
 
-                        function girarNubes() {
-                            nubes.rotation.y += 0.00035;
-                            requestAnimationFrame(girarNubes);
-                        }
-
-                        girarNubes();
+                        planetaGrupo.userData.nubes = nubes;
                     }
                 );
 
-                // Atmósfera
+                // =================================
+                // ATMÓSFERA
+                // =================================
+
                 const atmosfera = new THREE.Mesh(
-                    new THREE.SphereGeometry(1.045, 128, 128),
+                    new THREE.SphereGeometry(
+                        1.045,
+                        128,
+                        128
+                    ),
+
                     new THREE.MeshBasicMaterial({
                         color: 0x168bff,
                         transparent: true,
@@ -229,10 +381,14 @@
 
                 planetaGrupo.add(atmosfera);
 
-                // Estrellas
+                // =================================
+                // ESTRELLAS
+                // =================================
+
                 const posiciones = [];
 
                 for (let i = 0; i < 3000; i++) {
+
                     const x = (Math.random() - 0.5) * 100;
                     const y = (Math.random() - 0.5) * 100;
                     const z = (Math.random() - 0.5) * 100;
@@ -242,15 +398,20 @@
                     }
                 }
 
-                const geometriaEstrellas = new THREE.BufferGeometry();
+                const geometriaEstrellas =
+                    new THREE.BufferGeometry();
 
                 geometriaEstrellas.setAttribute(
                     'position',
-                    new THREE.Float32BufferAttribute(posiciones, 3)
+                    new THREE.Float32BufferAttribute(
+                        posiciones,
+                        3
+                    )
                 );
 
                 const estrellas = new THREE.Points(
                     geometriaEstrellas,
+
                     new THREE.PointsMaterial({
                         color: 0xffffff,
                         size: 0.035,
@@ -261,40 +422,70 @@
 
                 escena.add(estrellas);
 
-                // Animación principal
+                // =================================
+                // ANIMACIÓN PRINCIPAL
+                // =================================
+
                 function animar() {
+
                     requestAnimationFrame(animar);
 
                     planetaGrupo.rotation.y += 0.0012;
+
+                    if (planetaGrupo.userData.nubes) {
+                        planetaGrupo.userData.nubes.rotation.y += 0.00035;
+                    }
+
                     estrellas.rotation.y += 0.00004;
 
-                    renderizador.render(escena, camara);
+                    renderizador.render(
+                        escena,
+                        camara
+                    );
                 }
 
                 animar();
+            },
+
+            undefined,
+
+            (error) => {
+                console.error(
+                    'Error al cargar la Tierra:',
+                    error
+                );
             }
         );
 
-        // Ajustar tamaño
+        // =================================
+        // AJUSTAR TAMAÑO DE PANTALLA
+        // =================================
+
         function ajustarPantalla() {
+
             const ancho = contenedor.clientWidth;
             const alto = contenedor.clientHeight;
 
+            if (!ancho || !alto) return;
+
             camara.aspect = ancho / alto;
+
             camara.updateProjectionMatrix();
 
-            renderizador.setSize(ancho, alto);
+            renderizador.setSize(
+                ancho,
+                alto,
+                false
+            );
         }
 
-        window.addEventListener('resize', ajustarPantalla);
+        window.addEventListener(
+            'resize',
+            ajustarPantalla
+        );
+
         ajustarPantalla();
 
-    </script>
-
-    <script>
-        function iniciar() {
-            window.location.href = "principal.html";
-        }
     </script>
 
 </body>
