@@ -8,13 +8,13 @@
 
 <style>
 * {
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
 }
 
 html, body {
-    margin: 0;
     width: 100%;
-    min-height: 100%;
     height: 100%;
     overflow: hidden;
     background: #05060d;
@@ -24,9 +24,6 @@ html, body {
 #scene {
     position: fixed;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    height: 100dvh;
     touch-action: none;
     cursor: grab;
 }
@@ -39,53 +36,50 @@ html, body {
 
 #audioButton {
     position: fixed;
-    z-index: 5;
+    z-index: 10;
+    bottom: max(25px, env(safe-area-inset-bottom));
     left: 50%;
-    bottom: max(22px, env(safe-area-inset-bottom));
     transform: translateX(-50%);
-    min-width: 190px;
-    max-width: calc(100vw - 32px);
-    padding: 14px 24px;
-    border: 1px solid rgba(125, 235, 255, .8);
-    border-radius: 999px;
-    background: rgba(5, 15, 35, .88);
-    color: #fff;
-    font: 700 15px/1.2 system-ui, sans-serif;
-    letter-spacing: .08em;
+    padding: 14px 28px;
+    border: 1px solid rgba(120,220,255,.7);
+    border-radius: 30px;
+    background: rgba(8,25,55,.85);
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    letter-spacing: 2px;
     cursor: pointer;
-    box-shadow: 0 0 24px rgba(54, 211, 255, .25);
-    -webkit-tap-highlight-color: transparent;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 25px rgba(30,150,255,.3);
 }
 
 #audioButton:active {
-    transform: translateX(-50%) scale(.97);
+    transform: translateX(-50%) scale(.96);
 }
 
-#audioHint {
+#instructions {
     position: fixed;
-    z-index: 4;
-    left: 50%;
-    bottom: max(82px, calc(env(safe-area-inset-bottom) + 72px));
-    transform: translateX(-50%);
-    width: min(90vw, 360px);
-    color: rgba(255,255,255,.78);
+    z-index: 5;
+    bottom: 90px;
+    left: 0;
+    width: 100%;
+    padding: 8px 15px;
+    color: rgba(220,235,255,.8);
     text-align: center;
-    font: 13px/1.4 system-ui, sans-serif;
-    text-shadow: 0 2px 8px #000;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
     pointer-events: none;
 }
 
 @media (max-width: 600px) {
     #audioButton {
-        bottom: max(18px, env(safe-area-inset-bottom));
-        min-width: 180px;
-        padding: 13px 20px;
-        font-size: 14px;
+        font-size: 13px;
+        padding: 13px 23px;
     }
 
-    #audioHint {
-        bottom: max(76px, calc(env(safe-area-inset-bottom) + 68px));
-        font-size: 12px;
+    #instructions {
+        font-size: 11px;
+        bottom: 85px;
     }
 }
 </style>
@@ -93,13 +87,18 @@ html, body {
 
 <body>
 
-<div id="scene" aria-label="Planeta Tierra en 3D"></div>
-<p id="audioHint">Toca el botón para escuchar los sonidos de las auroras</p>
-<button id="audioButton" type="button">ACTIVAR SONIDO</button>
+<div id="scene"></div>
+
+<div id="instructions">
+    Arrastra para girar · Usa dos dedos para acercar o alejar
+</div>
+
+<button id="audioButton">ACTIVAR SONIDO</button>
 
 <script type="module">
 
 const mount = document.querySelector('#scene');
+const audioButton = document.querySelector('#audioButton');
 
 try {
 
@@ -495,7 +494,7 @@ scene.add(
 );
 
 // =====================================
-// MOVIMIENTO Y ZOOM
+// CONTROLES DE ROTACIÓN Y ZOOM
 // =====================================
 
 let drag = false;
@@ -504,25 +503,88 @@ let py = 0;
 
 let angle = -1.5;
 let tilt = .58;
+
 let distance = 3.6;
+
+const MIN_DISTANCE = 1.35;
+const MAX_DISTANCE = 9;
 
 const canvas = renderer.domElement;
 
+let pointers = new Map();
+let initialPinchDistance = 0;
+let initialPinchZoom = 3.6;
+
+function getTouchDistance() {
+
+    const points = [...pointers.values()];
+
+    if (points.length < 2) return 0;
+
+    return Math.hypot(
+        points[0].x - points[1].x,
+        points[0].y - points[1].y
+    );
+}
+
 canvas.addEventListener('pointerdown', e => {
 
-    drag = true;
-
-    px = e.clientX;
-    py = e.clientY;
+    pointers.set(e.pointerId, {
+        x: e.clientX,
+        y: e.clientY
+    });
 
     canvas.setPointerCapture(e.pointerId);
 
-    mount.style.cursor = 'grabbing';
+    if (pointers.size === 1) {
+
+        drag = true;
+
+        px = e.clientX;
+        py = e.clientY;
+
+        mount.style.cursor = 'grabbing';
+
+    } else if (pointers.size === 2) {
+
+        drag = false;
+
+        initialPinchDistance = getTouchDistance();
+        initialPinchZoom = distance;
+    }
+
 });
 
 canvas.addEventListener('pointermove', e => {
 
-    if (!drag) return;
+    if (!pointers.has(e.pointerId)) return;
+
+    pointers.set(e.pointerId, {
+        x: e.clientX,
+        y: e.clientY
+    });
+
+    if (pointers.size === 2) {
+
+        const currentDistance = getTouchDistance();
+
+        if (initialPinchDistance > 0) {
+
+            const scale = initialPinchDistance / currentDistance;
+
+            distance = Math.max(
+                MIN_DISTANCE,
+                Math.min(
+                    MAX_DISTANCE,
+                    initialPinchZoom * scale
+                )
+            );
+        }
+
+        return;
+    }
+
+    if (!drag || pointers.size !== 1) return;
 
     angle += (e.clientX - px) * .007;
 
@@ -536,25 +598,44 @@ canvas.addEventListener('pointermove', e => {
 
     px = e.clientX;
     py = e.clientY;
+
 });
 
-canvas.addEventListener('pointerup', () => {
-    drag = false;
-    mount.style.cursor = 'grab';
-});
+function finishPointer(e) {
 
-canvas.addEventListener('pointercancel', () => {
-    drag = false;
-    mount.style.cursor = 'grab';
-});
+    pointers.delete(e.pointerId);
 
+    if (pointers.size === 0) {
+
+        drag = false;
+        mount.style.cursor = 'grab';
+
+    } else if (pointers.size === 1) {
+
+        const remaining = [...pointers.values()][0];
+
+        px = remaining.x;
+        py = remaining.y;
+
+        drag = true;
+    }
+}
+
+canvas.addEventListener('pointerup', finishPointer);
+canvas.addEventListener('pointercancel', finishPointer);
+canvas.addEventListener('lostpointercapture', finishPointer);
+
+// Zoom con rueda del mouse
 canvas.addEventListener('wheel', e => {
 
     e.preventDefault();
 
     distance = Math.max(
-        1.3,
-        Math.min(9, distance + e.deltaY * .003)
+        MIN_DISTANCE,
+        Math.min(
+            MAX_DISTANCE,
+            distance + e.deltaY * .003
+        )
     );
 
 }, { passive: false });
@@ -580,6 +661,7 @@ async function startAudio() {
             const Audio = window.AudioContext || window.webkitAudioContext;
 
             if (!Audio) {
+                alert('Tu navegador no soporta audio.');
                 return false;
             }
 
@@ -589,10 +671,10 @@ async function startAudio() {
 
                 const oscillator = audioContext.createOscillator();
 
+                oscillator.type = 'sine';
                 oscillator.frequency.value = band.frequency;
 
                 band.gain = audioContext.createGain();
-
                 band.gain.gain.value = 0;
 
                 oscillator.connect(band.gain).connect(
@@ -615,9 +697,25 @@ async function startAudio() {
             'No se pudo activar el audio de la aurora',
             error
         );
+
         return false;
     }
 }
+
+audioButton.addEventListener('click', async () => {
+
+    const activated = await startAudio();
+
+    if (activated) {
+
+        audioButton.textContent = 'SONIDO ACTIVADO';
+        audioButton.style.borderColor = '#55ffb0';
+
+    } else {
+
+        audioButton.textContent = 'INTENTAR DE NUEVO';
+    }
+});
 
 // =====================================
 // CAPTURA DE COLORES
@@ -704,7 +802,7 @@ function renderWithAudio(time) {
 }
 
 // =====================================
-// ANÁLISIS RGB Y HSV EN JAVASCRIPT
+// ANÁLISIS RGB Y HSV
 // =====================================
 
 function pixelVolumes(frame) {
@@ -754,11 +852,11 @@ function pixelVolumes(frame) {
 
         for (let index = 0; index < shades.length; index++) {
 
-            const distance = Math.abs(
+            const distanceHue = Math.abs(
                 ((hue - shades[index] + 180) % 360 + 360) % 360 - 180
             );
 
-            const weight = Math.max(0, 1 - distance / 65);
+            const weight = Math.max(0, 1 - distanceHue / 65);
 
             energy[index] +=
                 weight * saturation * level / 255;
@@ -771,38 +869,6 @@ function pixelVolumes(frame) {
 }
 
 // =====================================
-// BOTÓN PARA ACTIVAR EL SONIDO
-// =====================================
-
-const audioButton = document.querySelector('#audioButton');
-const audioHint = document.querySelector('#audioHint');
-
-audioButton.addEventListener('click', async () => {
-
-    const activated = await startAudio();
-
-    if (activated) {
-
-        audioButton.textContent = 'SONIDO ACTIVADO';
-
-        audioHint.textContent =
-            'Explora la Tierra: los colores de las auroras generan sonidos';
-
-        audioButton.setAttribute('aria-label', 'Sonido activado');
-
-    } else {
-
-        audioButton.textContent = 'TOCA PARA REINTENTAR';
-
-        audioHint.textContent =
-            'Si no escuchas nada, sube el volumen y revisa que el teléfono no esté en silencio';
-    }
-});
-
-// También permite activar el audio tocando el planeta.
-canvas.addEventListener('pointerup', startAudio);
-
-// =====================================
 // RESPONSIVE
 // =====================================
 
@@ -812,15 +878,6 @@ function resize() {
     const h = mount.clientHeight;
 
     camera.aspect = w / h;
-
-    // Aleja el planeta en pantallas verticales.
-    if (w < 600) {
-        distance = 4.8;
-    } else if (w < 900) {
-        distance = 4.1;
-    } else {
-        distance = 3.6;
-    }
 
     camera.updateProjectionMatrix();
 
@@ -862,6 +919,17 @@ animate();
 
     console.error(e);
 
+    mount.innerHTML = `
+        <div style="
+            color:white;
+            font-family:Arial;
+            text-align:center;
+            padding:30px;
+        ">
+            No se pudo cargar la experiencia 3D.
+            Revisa tu conexión a internet e intenta nuevamente.
+        </div>
+    `;
 }
 
 </script>
