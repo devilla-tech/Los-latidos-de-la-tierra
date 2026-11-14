@@ -1,0 +1,765 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Los Latidos de la Tierra | Tierra 3D y auroras</title>
+
+<style>
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #05060d;
+    color-scheme: dark;
+}
+
+#scene {
+    position: fixed;
+    inset: 0;
+    touch-action: none;
+    cursor: grab;
+}
+
+#scene canvas {
+    display: block;
+}
+</style>
+</head>
+
+<body>
+
+<div id="scene"></div>
+
+<script type="module">
+
+const mount = document.querySelector('#scene');
+
+try {
+
+const THREE = await import('https://esm.sh/three@0.160.1');
+
+const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(44, 1, 0.1, 200);
+camera.position.z = 3.6;
+
+scene.background = new THREE.Color(0x05060d);
+
+const renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    alpha: false
+});
+
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.75;
+
+mount.appendChild(renderer.domElement);
+
+// =====================================
+// TIERRA
+// =====================================
+
+const globe = new THREE.Group();
+scene.add(globe);
+
+const loader = new THREE.TextureLoader();
+
+const load = url => new Promise((resolve, reject) =>
+    loader.load(url, resolve, undefined, reject)
+);
+
+const urls = [
+    'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
+    'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg'
+];
+
+let tex = null;
+
+for (const url of urls) {
+    try {
+        tex = await load(url);
+        break;
+    } catch (e) {}
+}
+
+if (!tex) {
+    throw Error('No se pudo descargar la textura terrestre.');
+}
+
+tex.colorSpace = THREE.SRGBColorSpace;
+
+// =====================================
+// MATERIAL DE LA TIERRA
+// =====================================
+
+const uniforms = {
+    uMap: { value: tex },
+    uTime: { value: 0 },
+    uStrength: { value: 0.55 }
+};
+
+const material = new THREE.ShaderMaterial({
+
+    uniforms,
+
+    vertexShader: `
+        varying vec2 vUv;
+        varying vec3 vNormal;
+        varying vec3 vPos;
+
+        void main() {
+            vUv = uv;
+            vNormal = normalize(normalMatrix * normal);
+
+            vec4 mv = modelViewMatrix * vec4(position, 1.);
+
+            vPos = mv.xyz;
+
+            gl_Position = projectionMatrix * mv;
+        }
+    `,
+
+    fragmentShader: `
+        uniform sampler2D uMap;
+        uniform float uTime;
+        uniform float uStrength;
+
+        varying vec2 vUv;
+        varying vec3 vNormal;
+        varying vec3 vPos;
+
+        void main() {
+
+            vec3 base = texture2D(uMap, vUv).rgb;
+
+            float ocean = smoothstep(
+                .015,
+                .115,
+                base.b - max(base.r, base.g)
+            );
+
+            vec2 p = vec2(vUv.x * 16., vUv.y * 10.);
+
+            float twist =
+                sin(p.x * .75 + sin(p.y * 1.3 + uTime * .12) * 1.6)
+                + cos(p.y * 1.1 - p.x * .38 - uTime * .16);
+
+            vec2 q = p + vec2(
+                sin(p.y * 1.7 + twist * 1.5 + uTime * .22),
+                cos(p.x * 1.25 - twist + uTime * .18)
+            ) * .85;
+
+            float filaments = sin(
+                q.x * 8. + q.y * 2.6
+                + sin(q.y * 2.3 + uTime * .35) * 4.
+                - uTime * 1.7
+            );
+
+            float fine = sin(
+                q.x * 17. - q.y * 8.
+                + sin(q.x * 2.8 + uTime * .2) * 5.
+                - uTime * 2.1
+            );
+
+            float broad = sin(
+                q.y * 3.1 + q.x * 1.4
+                + twist * 3. - uTime * .55
+            );
+
+            float crest = pow(
+                max(0., filaments * .68 + fine * .22 + broad * .2),
+                5.
+            );
+
+            float foam = crest * (
+                .42 + .58 * pow(
+                    .5 + .5 * sin(q.y * 2. + twist * 2.),
+                    2.
+                )
+            );
+
+            vec3 n = normalize(vNormal);
+
+            vec3 lightDir = normalize(vec3(-.5, .35, 1.));
+
+            float diffuse = max(dot(n, lightDir), 0.);
+
+            float latitude = abs(vUv.y - .5) * 2.;
+
+            float oceanHue = smoothstep(
+                -.85,
+                .90,
+                broad * .55 + (.65 - latitude) * .7 + base.g
+            );
+
+            vec3 water = mix(
+                vec3(.13, .26, .85),
+                vec3(.04, .83, .88),
+                oceanHue
+            );
+
+            water = mix(
+                water,
+                vec3(.38, .28, .90),
+                smoothstep(.45, .88, latitude) * .55
+            );
+
+            water += vec3(.55, .76, .82) * foam * uStrength * .82;
+
+            float brightness = dot(
+                base,
+                vec3(.2126, .7152, .0722)
+            );
+
+            float vegetation =
+                smoothstep(-.17, .035, base.g - base.r) *
+                smoothstep(-.025, .095, base.g - base.b);
+
+            float desert =
+                smoothstep(.035, .24, base.r - base.b) *
+                smoothstep(.11, .55, brightness);
+
+            vec3 land = mix(
+                clamp(
+                    vec3(brightness) + (base - brightness) * 1.65,
+                    0.,
+                    1.
+                ),
+                vec3(.97, .62, .24),
+                desert * .74
+            );
+
+            land = mix(
+                land,
+                mix(
+                    vec3(.07, .49, .23),
+                    vec3(.46, .88, .23),
+                    smoothstep(.04, .45, brightness)
+                ),
+                vegetation * .84
+            );
+
+            float ice = smoothstep(.54, .87, brightness) *
+                (1. - smoothstep(.04, .16, max(base.r, base.g) - base.b));
+
+            land = mix(land, vec3(.84, .95, 1.), ice * .62);
+
+            vec3 color = mix(land, water, ocean);
+
+            color *= .59 + .41 * diffuse;
+
+            float rim = pow(
+                1. - max(dot(n, normalize(-vPos)), 0.),
+                3.
+            );
+
+            vec3 rimColor = mix(
+                vec3(.20, .93, 1.),
+                vec3(.74, .42, 1.),
+                smoothstep(-.8, .8, n.x)
+            );
+
+            color = mix(color, rimColor, rim * .7);
+
+            gl_FragColor = vec4(clamp(color, 0., 1.), 1.);
+        }
+    `
+});
+
+globe.add(
+    new THREE.Mesh(
+        new THREE.SphereGeometry(1, 160, 112),
+        material
+    )
+);
+
+// =====================================
+// AURORAS BOREALES
+// =====================================
+
+const auroraUniforms = {
+    time: { value: 0 },
+    intensity: { value: .75 }
+};
+
+const auroraMaterial = new THREE.ShaderMaterial({
+
+    uniforms: auroraUniforms,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    side: THREE.DoubleSide,
+
+    vertexShader: `
+        uniform float time;
+        varying vec2 curtain;
+
+        void main() {
+
+            curtain = uv;
+
+            float longitude = uv.x * 6.2831853;
+            float height = uv.y;
+
+            float latitude = 1.15
+                + .105 * sin(longitude * 3. + time * .4)
+                + .048 * sin(longitude * 9. - time * .6)
+                + .025 * sin(longitude * 17. + height * 5. - time * .9);
+
+            float radius = 1.016 + height * .32;
+
+            vec3 point = radius * vec3(
+                cos(latitude) * cos(longitude),
+                sin(latitude),
+                cos(latitude) * sin(longitude)
+            );
+
+            gl_Position = projectionMatrix *
+                modelViewMatrix * vec4(point, 1.);
+        }
+    `,
+
+    fragmentShader: `
+        uniform float time;
+        uniform float intensity;
+
+        varying vec2 curtain;
+
+        void main() {
+
+            float longitude = curtain.x * 6.2831853;
+            float height = curtain.y;
+
+            float fold = sin(
+                longitude * 41.
+                + sin(longitude * 11. - time) * 2.
+                + height * 3.
+            );
+
+            float rays = pow(.5 + .5 * fold, 3.);
+
+            float pulse = .62 + .38 * sin(longitude * 5. - time * .8);
+
+            float fade =
+                smoothstep(0., .09, height) *
+                (1. - smoothstep(.15, 1., height));
+
+            vec3 color = mix(
+                vec3(.14, 1., .46),
+                vec3(.23, .78, 1.),
+                smoothstep(.11, .55, height)
+            );
+
+            color = mix(
+                color,
+                vec3(1., .24, .81),
+                smoothstep(.45, .91, height)
+            );
+
+            gl_FragColor = vec4(
+                color,
+                intensity * fade * (.37 + .63 * rays) * pulse
+            );
+        }
+    `
+});
+
+const aurora = new THREE.Mesh(
+    new THREE.PlaneGeometry(1, 1, 384, 18),
+    auroraMaterial
+);
+
+aurora.frustumCulled = false;
+globe.add(aurora);
+
+// =====================================
+// ESTRELLAS
+// =====================================
+
+const positions = [];
+const starColors = [];
+
+const starPalette = [
+    0x90c9ff,
+    0xffa3df,
+    0xffdb9a,
+    0x88ffe2
+].map(color => new THREE.Color(color));
+
+for (let i = 0; i < 2500; i++) {
+
+    const x = (Math.random() - .5) * 100;
+    const y = (Math.random() - .5) * 100;
+    const z = (Math.random() - .5) * 100;
+
+    if (Math.hypot(x, y, z) > 9) {
+
+        positions.push(x, y, z);
+
+        starColors.push(
+            ...starPalette[i % starPalette.length].toArray()
+        );
+    }
+}
+
+const sg = new THREE.BufferGeometry();
+
+sg.setAttribute(
+    'position',
+    new THREE.Float32BufferAttribute(positions, 3)
+);
+
+sg.setAttribute(
+    'color',
+    new THREE.Float32BufferAttribute(starColors, 3)
+);
+
+scene.add(
+    new THREE.Points(
+        sg,
+        new THREE.PointsMaterial({
+            vertexColors: true,
+            size: .085,
+            toneMapped: false
+        })
+    )
+);
+
+// =====================================
+// MOVIMIENTO Y ZOOM
+// =====================================
+
+let drag = false;
+let px = 0;
+let py = 0;
+
+let angle = -1.5;
+let tilt = .58;
+let distance = 3.6;
+
+const canvas = renderer.domElement;
+
+canvas.addEventListener('pointerdown', e => {
+
+    drag = true;
+
+    px = e.clientX;
+    py = e.clientY;
+
+    canvas.setPointerCapture(e.pointerId);
+
+    mount.style.cursor = 'grabbing';
+});
+
+canvas.addEventListener('pointermove', e => {
+
+    if (!drag) return;
+
+    angle += (e.clientX - px) * .007;
+
+    tilt = Math.max(
+        -1.45,
+        Math.min(
+            1.45,
+            tilt + (e.clientY - py) * .007
+        )
+    );
+
+    px = e.clientX;
+    py = e.clientY;
+});
+
+canvas.addEventListener('pointerup', () => {
+    drag = false;
+    mount.style.cursor = 'grab';
+});
+
+canvas.addEventListener('pointercancel', () => {
+    drag = false;
+    mount.style.cursor = 'grab';
+});
+
+canvas.addEventListener('wheel', e => {
+
+    e.preventDefault();
+
+    distance = Math.max(
+        1.3,
+        Math.min(9, distance + e.deltaY * .003)
+    );
+
+}, { passive: false });
+
+// =====================================
+// SISTEMA DE SONIDO
+// =====================================
+
+// Frecuencias asociadas a los colores de la aurora.
+
+const bands = [
+    { frequency: 130.81, height: .10 },
+    { frequency: 196, height: .36 },
+    { frequency: 261.63, height: .78 }
+];
+
+let audioContext;
+
+async function startAudio() {
+
+    try {
+
+        if (!audioContext) {
+
+            const Audio = window.AudioContext || window.webkitAudioContext;
+
+            if (!Audio) return;
+
+            audioContext = new Audio();
+
+            for (const band of bands) {
+
+                const oscillator = audioContext.createOscillator();
+
+                oscillator.frequency.value = band.frequency;
+
+                band.gain = audioContext.createGain();
+
+                band.gain.gain.value = 0;
+
+                oscillator.connect(band.gain).connect(
+                    audioContext.destination
+                );
+
+                oscillator.start();
+            }
+        }
+
+        if (audioContext.state !== 'running') {
+            await audioContext.resume();
+        }
+
+    } catch (error) {
+
+        console.error(
+            'No se pudo activar el audio de la aurora',
+            error
+        );
+    }
+}
+
+// =====================================
+// CAPTURA DE COLORES
+// =====================================
+
+const capture = document.createElement('canvas');
+
+capture.width = capture.height = 96;
+
+const captureContext = capture.getContext('2d', {
+    willReadFrequently: true
+});
+
+let lastCapture = -Infinity;
+
+function readFrame() {
+
+    captureContext.clearRect(0, 0, 96, 96);
+
+    captureContext.drawImage(canvas, 0, 0, 96, 96);
+
+    return captureContext.getImageData(0, 0, 96, 96).data;
+}
+
+// =====================================
+// ANÁLISIS DE LUZ Y SONIDO
+// =====================================
+
+function renderWithAudio(time) {
+
+    const sample =
+        audioContext?.state === 'running' &&
+        time - lastCapture >= .1;
+
+    let background;
+
+    if (sample) {
+
+        aurora.visible = false;
+
+        try {
+
+            renderer.render(scene, camera);
+
+            background = readFrame();
+
+        } finally {
+
+            aurora.visible = true;
+        }
+    }
+
+    renderer.render(scene, camera);
+
+    if (!sample) return;
+
+    lastCapture = time;
+
+    const full = readFrame();
+
+    const pixels = new Uint8Array(96 * 96 * 3);
+
+    for (let i = 0, j = 0; i < full.length; i += 4) {
+
+        for (let channel = 0; channel < 3; channel++) {
+
+            pixels[j++] = Math.max(
+                0,
+                full[i + channel] - background[i + channel]
+            );
+        }
+    }
+
+    const volumes = pixelVolumes(pixels);
+
+    bands.forEach((band, i) => {
+
+        band.gain.gain.setTargetAtTime(
+            volumes[i],
+            audioContext.currentTime,
+            .12
+        );
+    });
+}
+
+// =====================================
+// ANÁLISIS RGB Y HSV EN JAVASCRIPT
+// =====================================
+
+function pixelVolumes(frame) {
+
+    const energy = [0, 0, 0];
+
+    const shades = [140, 189, 320];
+
+    for (let offset = 0; offset < frame.length; offset += 3) {
+
+        const red = frame[offset] / 255;
+        const green = frame[offset + 1] / 255;
+        const blue = frame[offset + 2] / 255;
+
+        const max = Math.max(red, green, blue);
+        const min = Math.min(red, green, blue);
+
+        const delta = max - min;
+
+        const level = max * 255;
+
+        if (level < 10) continue;
+
+        let hue = 0;
+
+        const saturation = max === 0 ? 0 : delta / max;
+
+        if (delta !== 0) {
+
+            if (max === red) {
+
+                hue = ((green - blue) / delta) % 6;
+
+            } else if (max === green) {
+
+                hue = (blue - red) / delta + 2;
+
+            } else {
+
+                hue = (red - green) / delta + 4;
+            }
+
+            hue *= 60;
+
+            if (hue < 0) hue += 360;
+        }
+
+        for (let index = 0; index < shades.length; index++) {
+
+            const distance = Math.abs(
+                ((hue - shades[index] + 180) % 360 + 360) % 360 - 180
+            );
+
+            const weight = Math.max(0, 1 - distance / 65);
+
+            energy[index] +=
+                weight * saturation * level / 255;
+        }
+    }
+
+    return energy.map(total =>
+        0.18 * (1 - Math.exp(-total / 50))
+    );
+}
+
+// Activar sonido al tocar o hacer clic en el globo.
+canvas.addEventListener('pointerup', startAudio);
+
+// =====================================
+// RESPONSIVE
+// =====================================
+
+function resize() {
+
+    const w = mount.clientWidth;
+    const h = mount.clientHeight;
+
+    camera.aspect = w / h;
+
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(w, h, false);
+}
+
+window.addEventListener('resize', resize);
+
+resize();
+
+// =====================================
+// ANIMACIÓN PRINCIPAL
+// =====================================
+
+const clock = new THREE.Clock();
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    const dt = Math.min(clock.getDelta(), .05);
+
+    globe.rotation.y = angle;
+    globe.rotation.x = tilt;
+
+    uniforms.uTime.value += dt;
+
+    auroraUniforms.time.value += dt;
+
+    camera.position.z +=
+        (distance - camera.position.z) * .12;
+
+    renderWithAudio(auroraUniforms.time.value);
+}
+
+animate();
+
+} catch (e) {
+
+    console.error(e);
+
+}
+
+</script>
+
+</body>
+</html>
