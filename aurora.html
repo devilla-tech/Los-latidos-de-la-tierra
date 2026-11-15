@@ -2,18 +2,17 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Los Latidos de la Tierra | Tierra 3D y auroras</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Los latidos de la Tierra | Experiencia 3D</title>
 
 <style>
 * {
-    margin: 0;
-    padding: 0;
     box-sizing: border-box;
 }
 
 html, body {
+    margin: 0;
     width: 100%;
     height: 100%;
     overflow: hidden;
@@ -24,6 +23,8 @@ html, body {
 #scene {
     position: fixed;
     inset: 0;
+    width: 100%;
+    height: 100%;
     touch-action: none;
     cursor: grab;
 }
@@ -34,52 +35,83 @@ html, body {
     height: 100%;
 }
 
-#audioButton {
+.effects {
     position: fixed;
     z-index: 10;
-    bottom: max(25px, env(safe-area-inset-bottom));
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 14px 28px;
-    border: 1px solid rgba(120,220,255,.7);
-    border-radius: 30px;
-    background: rgba(8,25,55,.85);
-    color: white;
-    font-size: 15px;
-    font-weight: bold;
-    letter-spacing: 2px;
+    right: clamp(10px, 2vw, 26px);
+    top: clamp(10px, 2vw, 26px);
+    display: grid;
+    gap: 8px;
+    font: 14px system-ui;
+    width: min(260px, calc(100vw - 20px));
+}
+
+.effects button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    color: #f4f0ff;
+    background: #141b30;
+    border: 1px solid #526381;
+    border-radius: 9px;
     cursor: pointer;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 0 25px rgba(30,150,255,.3);
+    text-align: left;
+    font: inherit;
 }
 
-#audioButton:active {
-    transform: translateX(-50%) scale(.96);
+.effects button[aria-pressed="true"] {
+    border-color: #79e7cf;
 }
 
-#instructions {
-    position: fixed;
-    z-index: 5;
-    bottom: 90px;
-    left: 0;
-    width: 100%;
-    padding: 8px 15px;
-    color: rgba(220,235,255,.8);
-    text-align: center;
-    font-family: Arial, sans-serif;
+.effects button:focus-visible {
+    outline: 2px solid white;
+    outline-offset: 3px;
+}
+
+.effect-arrow {
+    color: #aab5ce;
+    transition: transform .2s;
+}
+
+.effects button[aria-pressed="true"] .effect-arrow {
+    transform: rotate(90deg);
+    color: #79e7cf;
+}
+
+.cloud-intensity {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 5px 8px;
+    align-items: center;
+    padding: 8px;
+    color: #f4f0ff;
+    background: #141b30;
+    border-radius: 9px;
     font-size: 12px;
-    pointer-events: none;
 }
 
-@media (max-width: 600px) {
-    #audioButton {
-        font-size: 13px;
-        padding: 13px 23px;
+.cloud-intensity input {
+    grid-column: 1/-1;
+    width: 100%;
+    margin: 0;
+    accent-color: #79e7cf;
+    cursor: pointer;
+}
+
+.cloud-intensity output {
+    font-variant-numeric: tabular-nums;
+}
+
+@media(max-width:600px) {
+    .effects {
+        width: 190px;
+        font-size: 12px;
     }
 
-    #instructions {
-        font-size: 11px;
-        bottom: 85px;
+    .effects button {
+        padding: 8px 9px;
     }
 }
 </style>
@@ -89,16 +121,41 @@ html, body {
 
 <div id="scene"></div>
 
-<div id="instructions">
-    Arrastra para girar · Usa dos dedos para acercar o alejar
-</div>
+<div class="effects" role="group" aria-label="Efectos del planeta">
 
-<button id="audioButton">ACTIVAR SONIDO</button>
+    <button type="button" id="toggle-aurora" aria-pressed="true">
+        Aurora boreal
+        <span class="effect-arrow" aria-hidden="true">▸</span>
+    </button>
+
+    <button type="button" id="toggle-water" aria-pressed="false">
+        Olas del mar
+        <span class="effect-arrow" aria-hidden="true">▸</span>
+    </button>
+
+    <button type="button" id="toggle-temperature" aria-pressed="false" title="Temperatura simulada">
+        Temperatura continental
+        <span class="effect-arrow" aria-hidden="true">▸</span>
+    </button>
+
+    <button type="button" id="toggle-clouds" aria-pressed="false">
+        Nubes
+        <span class="effect-arrow" aria-hidden="true">▸</span>
+    </button>
+
+    <label class="cloud-intensity" for="cloud-intensity">
+        <span>Intensidad de nubes</span>
+        <output id="cloud-intensity-value" for="cloud-intensity">100 %</output>
+
+        <input type="range" id="cloud-intensity"
+            min="0" max="200" step="1" value="100">
+    </label>
+
+</div>
 
 <script type="module">
 
 const mount = document.querySelector('#scene');
-const audioButton = document.querySelector('#audioButton');
 
 try {
 
@@ -106,8 +163,10 @@ const THREE = await import('https://esm.sh/three@0.160.1');
 
 const scene = new THREE.Scene();
 
-const camera = new THREE.PerspectiveCamera(44, 1, 0.1, 200);
-camera.position.z = 3.6;
+// CÁMARA CENTRADA
+const camera = new THREE.PerspectiveCamera(44, 1, .1, 200);
+camera.position.set(0, 0, 3.6);
+camera.lookAt(0, 0, 0);
 
 scene.background = new THREE.Color(0x05060d);
 
@@ -116,18 +175,16 @@ const renderer = new THREE.WebGLRenderer({
     alpha: false
 });
 
-renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.75;
 
 mount.appendChild(renderer.domElement);
 
-// =====================================
-// TIERRA
-// =====================================
-
+// GRUPO DE LA TIERRA CENTRADO
 const globe = new THREE.Group();
+globe.position.set(0, 0, 0);
 scene.add(globe);
 
 const loader = new THREE.TextureLoader();
@@ -147,302 +204,542 @@ for (const url of urls) {
     try {
         tex = await load(url);
         break;
-    } catch (e) {}
+    } catch(e) {}
 }
 
 if (!tex) {
-    throw Error('No se pudo descargar la textura terrestre.');
+    throw Error('No se pudo descargar la textura terrestre. Comprueba Internet.');
 }
 
 tex.colorSpace = THREE.SRGBColorSpace;
 
-// =====================================
-// MATERIAL DE LA TIERRA
-// =====================================
-
 const uniforms = {
-    uMap: { value: tex },
-    uTime: { value: 0 },
-    uStrength: { value: 0.55 }
+    uMap: {value: tex},
+    uTime: {value: 0},
+    uStrength: {value: 0},
+    uTemperature: {value: 0},
+    uThermalTime: {value: 0}
 };
 
 const material = new THREE.ShaderMaterial({
 
-    uniforms,
+uniforms,
 
-    vertexShader: `
-        varying vec2 vUv;
-        varying vec3 vNormal;
-        varying vec3 vPos;
+vertexShader: `
+varying vec2 vUv;
+varying vec3 vNormal;
+varying vec3 vPos;
 
-        void main() {
-            vUv = uv;
-            vNormal = normalize(normalMatrix * normal);
+void main() {
+    vUv = uv;
+    vNormal = normalize(normalMatrix * normal);
 
-            vec4 mv = modelViewMatrix * vec4(position, 1.);
+    vec4 mv = modelViewMatrix * vec4(position,1.);
+    vPos = mv.xyz;
 
-            vPos = mv.xyz;
+    gl_Position = projectionMatrix * mv;
+}
+`,
 
-            gl_Position = projectionMatrix * mv;
-        }
-    `,
+fragmentShader: `
+uniform sampler2D uMap;
+uniform float uTime;
+uniform float uStrength;
+uniform float uTemperature;
+uniform float uThermalTime;
 
-    fragmentShader: `
-        uniform sampler2D uMap;
-        uniform float uTime;
-        uniform float uStrength;
+varying vec2 vUv;
+varying vec3 vNormal;
+varying vec3 vPos;
 
-        varying vec2 vUv;
-        varying vec3 vNormal;
-        varying vec3 vPos;
+float hash(vec2 p) {
+    return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);
+}
 
-        void main() {
+float noise(vec2 p) {
+    vec2 i = floor(p), f = fract(p);
+    vec2 s = f*f*(3.-2.*f);
 
-            vec3 base = texture2D(uMap, vUv).rgb;
+    return mix(
+        mix(hash(i),hash(i+vec2(1.,0.)),s.x),
+        mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),s.x),
+        s.y
+    );
+}
 
-            float ocean = smoothstep(
-                .015,
-                .115,
-                base.b - max(base.r, base.g)
-            );
+float textureCloud(vec2 p) {
+    return .56*noise(p)+.29*noise(p*2.13)+.15*noise(p*4.31);
+}
 
-            vec2 p = vec2(vUv.x * 16., vUv.y * 10.);
+float regionalPatch(vec2 uv,vec2 center,vec2 size) {
+    vec2 offset = uv-center;
+    offset.x = fract(offset.x+.5)-.5;
 
-            float twist =
-                sin(p.x * .75 + sin(p.y * 1.3 + uTime * .12) * 1.6)
-                + cos(p.y * 1.1 - p.x * .38 - uTime * .16);
+    return 1.-smoothstep(.49,1.,length(offset/(size*1.22)));
+}
 
-            vec2 q = p + vec2(
-                sin(p.y * 1.7 + twist * 1.5 + uTime * .22),
-                cos(p.x * 1.25 - twist + uTime * .18)
-            ) * .85;
+float inlandPatch(vec2 point,vec2 center,vec2 extent) {
+    return 1.-smoothstep(.70,1.,length((point-center)/extent));
+}
 
-            float filaments = sin(
-                q.x * 8. + q.y * 2.6
-                + sin(q.y * 2.3 + uTime * .35) * 4.
-                - uTime * 1.7
-            );
+void main() {
 
-            float fine = sin(
-                q.x * 17. - q.y * 8.
-                + sin(q.x * 2.8 + uTime * .2) * 5.
-                - uTime * 2.1
-            );
+vec3 base = texture2D(uMap,vUv).rgb;
 
-            float broad = sin(
-                q.y * 3.1 + q.x * 1.4
-                + twist * 3. - uTime * .55
-            );
+float ocean = smoothstep(.015,.115,base.b-max(base.r,base.g));
 
-            float crest = pow(
-                max(0., filaments * .68 + fine * .22 + broad * .2),
-                5.
-            );
+vec2 p = vec2(vUv.x * 18., vUv.y * 12.);
 
-            float foam = crest * (
-                .42 + .58 * pow(
-                    .5 + .5 * sin(q.y * 2. + twist * 2.),
-                    2.
-                )
-            );
+float twist =
+    sin(p.x * 1.15 + 2.2 * sin(p.y * 1.9 + uTime * .85))
+    + cos(p.y * 1.45 - p.x * .6 - uTime * .72);
 
-            vec3 n = normalize(vNormal);
+vec2 q = p + vec2(
+    sin(p.y * 2.0 + twist * 2.1 + uTime * .95),
+    cos(p.x * 1.3 - twist * 1.8 - uTime * .84)
+) * 1.35;
 
-            vec3 lightDir = normalize(vec3(-.5, .35, 1.));
+float filaments = sin(q.x * 7. + q.y * 4. +
+    3.8 * sin(q.y * 2.7 + uTime) - uTime * 4.);
 
-            float diffuse = max(dot(n, lightDir), 0.);
+float crossWave = sin(q.x * 13. - q.y * 9. +
+    3. * cos(q.x * 2.4 - uTime) - uTime * 5.2);
 
-            float latitude = abs(vUv.y - .5) * 2.;
+float broad = sin(q.y * 2.9 + q.x * 1.8 +
+    2.5 * twist - uTime * 1.5);
 
-            float oceanHue = smoothstep(
-                -.85,
-                .90,
-                broad * .55 + (.65 - latitude) * .7 + base.g
-            );
+float crest = smoothstep(.22,.93,
+    .53 * filaments + .28 * crossWave + .34 * broad);
 
-            vec3 water = mix(
-                vec3(.13, .26, .85),
-                vec3(.04, .83, .88),
-                oceanHue
-            );
+float foam = crest * (.50 + .50 *
+    smoothstep(-.15,.65,sin(q.x * 19. + q.y * 22. + uTime * 3.)));
 
-            water = mix(
-                water,
-                vec3(.38, .28, .90),
-                smoothstep(.45, .88, latitude) * .55
-            );
+vec3 n = normalize(vNormal);
+vec3 lightDir = normalize(vec3(-.5,.35,1.));
 
-            water += vec3(.55, .76, .82) * foam * uStrength * .82;
+float diffuse = max(dot(n,lightDir),0.);
+float latitude = abs(vUv.y-.5)*2.;
 
-            float brightness = dot(
-                base,
-                vec3(.2126, .7152, .0722)
-            );
+float oceanHue = smoothstep(-.85,.90,
+    broad*.55*clamp(uStrength,0.,1.)+(.65-latitude)*.7+base.g);
 
-            float vegetation =
-                smoothstep(-.17, .035, base.g - base.r) *
-                smoothstep(-.025, .095, base.g - base.b);
-
-            float desert =
-                smoothstep(.035, .24, base.r - base.b) *
-                smoothstep(.11, .55, brightness);
-
-            vec3 land = mix(
-                clamp(
-                    vec3(brightness) + (base - brightness) * 1.65,
-                    0.,
-                    1.
-                ),
-                vec3(.97, .62, .24),
-                desert * .74
-            );
-
-            land = mix(
-                land,
-                mix(
-                    vec3(.07, .49, .23),
-                    vec3(.46, .88, .23),
-                    smoothstep(.04, .45, brightness)
-                ),
-                vegetation * .84
-            );
-
-            float ice = smoothstep(.54, .87, brightness) *
-                (1. - smoothstep(.04, .16, max(base.r, base.g) - base.b));
-
-            land = mix(land, vec3(.84, .95, 1.), ice * .62);
-
-            vec3 color = mix(land, water, ocean);
-
-            color *= .59 + .41 * diffuse;
-
-            float rim = pow(
-                1. - max(dot(n, normalize(-vPos)), 0.),
-                3.
-            );
-
-            vec3 rimColor = mix(
-                vec3(.20, .93, 1.),
-                vec3(.74, .42, 1.),
-                smoothstep(-.8, .8, n.x)
-            );
-
-            color = mix(color, rimColor, rim * .7);
-
-            gl_FragColor = vec4(clamp(color, 0., 1.), 1.);
-        }
-    `
-});
-
-globe.add(
-    new THREE.Mesh(
-        new THREE.SphereGeometry(1, 160, 112),
-        material
-    )
+vec3 water = mix(
+    vec3(.13,.26,.85),
+    vec3(.04,.83,.88),
+    oceanHue
 );
 
-// =====================================
+water = mix(water,vec3(.38,.28,.90),
+    smoothstep(.45,.88,latitude)*.55);
+
+float current = pow(.5 + .5 * sin(
+    2.1*q.x + 3.6*q.y + 1.8*twist - .7*uTime
+),5.);
+
+water = mix(water,vec3(.78,.97,1.),
+    clamp((foam*.83+current*.19)*uStrength,0.,.93));
+
+float brightness = dot(base,vec3(.2126,.7152,.0722));
+
+float vegetation = smoothstep(-.17,.035,base.g-base.r)*
+    smoothstep(-.025,.095,base.g-base.b);
+
+float desert = smoothstep(.035,.24,base.r-base.b)*
+    smoothstep(.11,.55,brightness);
+
+vec3 land = mix(
+    clamp(vec3(brightness)+(base-brightness)*1.65,0.,1.),
+    vec3(.97,.62,.24),
+    desert*.74
+);
+
+land = mix(land,
+    mix(vec3(.07,.49,.23),vec3(.46,.88,.23),
+    smoothstep(.04,.45,brightness)),
+    vegetation*.84
+);
+
+float ice = smoothstep(.54,.87,brightness)*
+    (1.-smoothstep(.04,.16,max(base.r,base.g)-base.b));
+
+land = mix(land,vec3(.84,.95,1.),ice*.62);
+
+vec3 color = mix(land,water,ocean);
+color *= .59+.41*diffuse;
+
+float rim = pow(1.-max(dot(n,normalize(-vPos)),0.),3.);
+
+vec3 rimColor = mix(
+    vec3(.20,.93,1.),
+    vec3(.74,.42,1.),
+    smoothstep(-.8,.8,n.x)
+);
+
+color = mix(color,rimColor,rim*.7);
+
+if(uTemperature>.5) {
+
+    float blueExcess = base.b-max(base.r,base.g);
+
+    float blueRatio = blueExcess/
+        max(.025,max(base.r,max(base.g,base.b)));
+
+    float seaMask = max(ocean,
+        max(smoothstep(.003,.017,blueExcess),
+        smoothstep(.045,.15,blueRatio)));
+
+    vec2 degrees = (vUv-.5)*vec2(360.,180.);
+
+    float amazon = inlandPatch(degrees,vec2(-60.,-6.),vec2(17.,13.));
+    float brazil = inlandPatch(degrees,vec2(-51.,-13.),vec2(11.,12.));
+    float northBrazil = inlandPatch(degrees,vec2(-46.,-6.),vec2(7.,6.));
+    float northernAndes = inlandPatch(degrees,vec2(-73.,3.),vec2(5.,7.));
+    float centralAndes = inlandPatch(degrees,vec2(-68.,-16.),vec2(5.,13.));
+    float chaco = inlandPatch(degrees,vec2(-61.,-23.),vec2(7.,9.));
+    float pampas = inlandPatch(degrees,vec2(-64.,-34.),vec2(6.,10.));
+    float patagonia = inlandPatch(degrees,vec2(-68.,-46.),vec2(3.,7.));
+
+    float southInterior = max(
+        max(max(amazon,brazil),max(northBrazil,northernAndes)),
+        max(max(centralAndes,chaco),max(pampas,patagonia))
+    );
+
+    float sahara = inlandPatch(degrees,vec2(12.,23.),vec2(23.,8.));
+    float centralAfrica = inlandPatch(degrees,vec2(22.,5.),vec2(14.,15.));
+    float southernAfrica = inlandPatch(degrees,vec2(24.,-17.),vec2(9.,12.));
+
+    float inland = max(southInterior,
+        max(sahara,max(centralAfrica,southernAfrica)));
+
+    float landMask = max(1.-smoothstep(.06,.34,seaMask),inland);
+
+    float longitude = vUv.x*6.2831853;
+
+    vec2 drift = vec2(
+        cos(longitude+uThermalTime*.024),
+        sin(longitude+uThermalTime*.024)
+    )*6.;
+
+    vec2 cloudPosition = drift+vec2(8.,23.)*vUv.y;
+
+    float billows = textureCloud(cloudPosition);
+
+    float northAmerica = regionalPatch(vUv,vec2(.218,.774),vec2(.107,.161));
+    float centralAmerica = regionalPatch(vUv,vec2(.248,.602),vec2(.046,.061));
+    float southAmerica = regionalPatch(vUv,vec2(.334,.380),vec2(.133,.315));
+
+    float southCoverage = max(southAmerica,southInterior);
+
+    float america = max(northAmerica,max(centralAmerica,southAmerica));
+
+    float africa = regionalPatch(vUv,vec2(.556,.507),vec2(.121,.209));
+    float europe = regionalPatch(vUv,vec2(.554,.783),vec2(.103,.109));
+    float asia = regionalPatch(vUv,vec2(.760,.73),vec2(.155,.182));
+    float australia = regionalPatch(vUv,vec2(.872,.359),vec2(.084,.119));
+    float newZealand = regionalPatch(vUv,vec2(.980,.268),vec2(.039,.075));
+    float newGuinea = regionalPatch(vUv,vec2(.896,.462),vec2(.067,.050));
+
+    float oceania = max(australia,max(newZealand,newGuinea));
+
+    float region = max(max(america,africa),
+        max(max(europe,asia),oceania));
+
+    float floorGlow = mix(.42,.75,max(inland,southCoverage));
+
+    float core = mix(floorGlow,1.,
+        smoothstep(.24,.66,billows));
+
+    float halo = .42+.58*smoothstep(.13,.42,billows)*
+        (1.-.55*core);
+
+    float cloudOpacity = landMask*
+        mix(.67,1.,min(1.,region+.25*max(america,africa)));
+
+    float heat = 1.-smoothstep(.15,.78,latitude);
+
+    vec3 blue = vec3(.10,.40,1.);
+    vec3 yellow = vec3(1.,.86,.12);
+    vec3 orange = vec3(1.,.37,.06);
+
+    vec3 thermal = mix(blue,yellow,
+        smoothstep(.29,.48,heat));
+
+    thermal = mix(thermal,orange,
+        smoothstep(.62,.82,heat));
+
+    float pulse = .9+.1*sin(uThermalTime*1.15+billows*6.);
+
+    vec3 haloColor = thermal;
+
+    vec3 glow = clamp(
+        thermal*core*(.96+.14*america)
+        +haloColor*halo*(.78+.17*america),
+        0.,1.
+    )*cloudOpacity*pulse;
+
+    vec2 veilPosition = cloudPosition*1.8+
+        vec2(.21,-.82)*uThermalTime;
+
+    float veil = smoothstep(.43,.75,textureCloud(veilPosition));
+
+    float ribbon = .5+.5*sin(
+        vUv.y*135.+3.6*billows-uThermalTime*1.8
+    );
+
+    float shimmer = veil*smoothstep(.58,.92,ribbon)*landMask*.52;
+
+    color = 1.-(1.-clamp(color,0.,1.))*(1.-glow);
+
+    color = mix(color,mix(thermal,vec3(1.),.6),shimmer);
+}
+
+gl_FragColor = vec4(clamp(color,0.,1.),1.);
+
+}`
+});
+
+globe.add(new THREE.Mesh(
+    new THREE.SphereGeometry(1,160,112),
+    material
+));
+
+
+// ==========================================
 // AURORAS BOREALES
-// =====================================
+// ==========================================
 
 const auroraUniforms = {
-    time: { value: 0 },
-    intensity: { value: .75 }
+    time: {value: 0},
+    intensity: {value: .75}
 };
 
 const auroraMaterial = new THREE.ShaderMaterial({
 
     uniforms: auroraUniforms,
+
     transparent: true,
     depthWrite: false,
     blending: THREE.AdditiveBlending,
     side: THREE.DoubleSide,
 
     vertexShader: `
-        uniform float time;
-        varying vec2 curtain;
+    uniform float time;
+    varying vec2 curtain;
 
-        void main() {
+    void main() {
 
-            curtain = uv;
+        curtain = uv;
 
-            float longitude = uv.x * 6.2831853;
-            float height = uv.y;
+        float longitude = uv.x * 6.2831853;
+        float height = uv.y;
 
-            float latitude = 1.15
-                + .105 * sin(longitude * 3. + time * .4)
-                + .048 * sin(longitude * 9. - time * .6)
-                + .025 * sin(longitude * 17. + height * 5. - time * .9);
+        float latitude = 1.15
+            + .105 * sin(longitude * 3. + time * .4)
+            + .048 * sin(longitude * 9. - time * .6)
+            + .025 * sin(longitude * 17. + height * 5. - time * .9);
 
-            float radius = 1.016 + height * .32;
+        float radius = 1.016 + height * .32;
 
-            vec3 point = radius * vec3(
-                cos(latitude) * cos(longitude),
-                sin(latitude),
-                cos(latitude) * sin(longitude)
-            );
+        vec3 point = radius * vec3(
+            cos(latitude) * cos(longitude),
+            sin(latitude),
+            cos(latitude) * sin(longitude)
+        );
 
-            gl_Position = projectionMatrix *
-                modelViewMatrix * vec4(point, 1.);
-        }
-    `,
+        gl_Position = projectionMatrix *
+            modelViewMatrix * vec4(point,1.);
+    }`,
 
     fragmentShader: `
-        uniform float time;
-        uniform float intensity;
+    uniform float time;
+    uniform float intensity;
+    varying vec2 curtain;
 
-        varying vec2 curtain;
+    void main() {
 
-        void main() {
+        float longitude = curtain.x * 6.2831853;
+        float height = curtain.y;
 
-            float longitude = curtain.x * 6.2831853;
-            float height = curtain.y;
+        float fold = sin(
+            longitude * 41. +
+            sin(longitude * 11. - time) * 2. +
+            height * 3.
+        );
 
-            float fold = sin(
-                longitude * 41.
-                + sin(longitude * 11. - time) * 2.
-                + height * 3.
-            );
+        float rays = pow(.5 + .5 * fold,3.);
+        float pulse = .62 + .38 * sin(longitude * 5. - time * .8);
 
-            float rays = pow(.5 + .5 * fold, 3.);
+        float fade = smoothstep(0.,.09,height) *
+            (1. - smoothstep(.15,1.,height));
 
-            float pulse = .62 + .38 * sin(longitude * 5. - time * .8);
+        vec3 color = mix(
+            vec3(.14,1.,.46),
+            vec3(.23,.78,1.),
+            smoothstep(.11,.55,height)
+        );
 
-            float fade =
-                smoothstep(0., .09, height) *
-                (1. - smoothstep(.15, 1., height));
+        color = mix(color,vec3(1.,.24,.81),
+            smoothstep(.45,.91,height));
 
-            vec3 color = mix(
-                vec3(.14, 1., .46),
-                vec3(.23, .78, 1.),
-                smoothstep(.11, .55, height)
-            );
-
-            color = mix(
-                color,
-                vec3(1., .24, .81),
-                smoothstep(.45, .91, height)
-            );
-
-            gl_FragColor = vec4(
-                color,
-                intensity * fade * (.37 + .63 * rays) * pulse
-            );
-        }
-    `
+        gl_FragColor = vec4(
+            color,
+            intensity * fade * (.37+.63*rays) * pulse
+        );
+    }`
 });
 
 const aurora = new THREE.Mesh(
-    new THREE.PlaneGeometry(1, 1, 384, 18),
+    new THREE.PlaneGeometry(1,1,384,18),
     auroraMaterial
 );
 
 aurora.frustumCulled = false;
 globe.add(aurora);
 
-// =====================================
+
+// ==========================================
+// CONTROLES DE EFECTOS
+// ==========================================
+
+function bindEffect(id, apply) {
+
+    const button = document.getElementById(id);
+
+    apply(button.getAttribute('aria-pressed') === 'true');
+
+    button.addEventListener('click', () => {
+
+        const enabled =
+            button.getAttribute('aria-pressed') !== 'true';
+
+        button.setAttribute('aria-pressed',String(enabled));
+
+        apply(enabled);
+    });
+}
+
+bindEffect('toggle-aurora', enabled => {
+    aurora.visible = enabled;
+});
+
+bindEffect('toggle-temperature', enabled => {
+    uniforms.uTemperature.value = Number(enabled);
+});
+
+bindEffect('toggle-water', enabled => {
+    uniforms.uStrength.value = enabled ? 1.2 : 0;
+});
+
+
+// ==========================================
+// NUBES
+// ==========================================
+
+const cloudTime = {value:0};
+const cloudCover = {value:0};
+
+const cloudLayer = new THREE.Mesh(
+    new THREE.SphereGeometry(1.012,128,80),
+
+    new THREE.ShaderMaterial({
+
+        transparent:true,
+        depthWrite:false,
+
+        uniforms: {
+            time: cloudTime,
+            cloudCover
+        },
+
+        vertexShader: `
+        varying vec2 cloudUV;
+
+        void main() {
+            cloudUV = uv;
+
+            gl_Position = projectionMatrix *
+                modelViewMatrix * vec4(position,1.);
+        }`,
+
+        fragmentShader: `
+
+        uniform float time;
+        uniform float cloudCover;
+
+        varying vec2 cloudUV;
+
+        float hash(vec2 p) {
+            return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);
+        }
+
+        float noise(vec2 p) {
+
+            vec2 i = floor(p), f = fract(p);
+            vec2 s = f*f*(3.-2.*f);
+
+            return mix(
+                mix(hash(i),hash(i+vec2(1.,0.)),s.x),
+                mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),s.x),
+                s.y
+            );
+        }
+
+        float textureCloud(vec2 p) {
+            return .56*noise(p)+.29*noise(p*2.13)+.15*noise(p*4.31);
+        }
+
+        void main() {
+
+            float longitude = 6.2831853*cloudUV.x;
+
+            vec2 drift = vec2(
+                cos(longitude+time*.017),
+                sin(longitude+time*.017)
+            )*13.;
+
+            vec2 p = drift+vec2(18.,53.)*cloudUV.y;
+
+            float patches = smoothstep(.59,.79,textureCloud(p))*.50;
+
+            patches *= smoothstep(0.,.09,cloudUV.y)*
+                (1.-smoothstep(.91,1.,cloudUV.y));
+
+            gl_FragColor = vec4(
+                vec3(.86,.92,1.),
+                cloudCover*patches
+            );
+        }`
+    })
+);
+
+globe.add(cloudLayer);
+
+const cloudButton = document.getElementById('toggle-clouds');
+const cloudIntensity = document.getElementById('cloud-intensity');
+const cloudIntensityValue = document.getElementById('cloud-intensity-value');
+
+function updateCloudIntensity() {
+
+    const intensity = Number(cloudIntensity.value);
+
+    const enabled =
+        cloudButton.getAttribute('aria-pressed') === 'true';
+
+    cloudIntensityValue.textContent = intensity + ' %';
+
+    cloudCover.value = enabled ? intensity/100 : 0;
+
+    cloudLayer.visible = cloudCover.value > 0;
+}
+
+bindEffect('toggle-clouds', updateCloudIntensity);
+
+cloudIntensity.addEventListener('input',updateCloudIntensity);
+
+
+// ==========================================
 // ESTRELLAS
-// =====================================
+// ==========================================
 
 const positions = [];
 const starColors = [];
@@ -454,18 +751,18 @@ const starPalette = [
     0x88ffe2
 ].map(color => new THREE.Color(color));
 
-for (let i = 0; i < 2500; i++) {
+for(let i=0;i<2500;i++) {
 
-    const x = (Math.random() - .5) * 100;
-    const y = (Math.random() - .5) * 100;
-    const z = (Math.random() - .5) * 100;
+    const x = (Math.random()-.5)*100;
+    const y = (Math.random()-.5)*100;
+    const z = (Math.random()-.5)*100;
 
-    if (Math.hypot(x, y, z) > 9) {
+    if(Math.hypot(x,y,z)>9) {
 
-        positions.push(x, y, z);
+        positions.push(x,y,z);
 
         starColors.push(
-            ...starPalette[i % starPalette.length].toArray()
+            ...starPalette[i%starPalette.length].toArray()
         );
     }
 }
@@ -474,28 +771,27 @@ const sg = new THREE.BufferGeometry();
 
 sg.setAttribute(
     'position',
-    new THREE.Float32BufferAttribute(positions, 3)
+    new THREE.Float32BufferAttribute(positions,3)
 );
 
 sg.setAttribute(
     'color',
-    new THREE.Float32BufferAttribute(starColors, 3)
+    new THREE.Float32BufferAttribute(starColors,3)
 );
 
-scene.add(
-    new THREE.Points(
-        sg,
-        new THREE.PointsMaterial({
-            vertexColors: true,
-            size: .085,
-            toneMapped: false
-        })
-    )
-);
+scene.add(new THREE.Points(
+    sg,
+    new THREE.PointsMaterial({
+        vertexColors:true,
+        size:.085,
+        toneMapped:false
+    })
+));
 
-// =====================================
-// CONTROLES DE ROTACIÓN Y ZOOM
-// =====================================
+
+// ==========================================
+// ROTACION Y ZOOM
+// ==========================================
 
 let drag = false;
 let px = 0;
@@ -503,374 +799,625 @@ let py = 0;
 
 let angle = -1.5;
 let tilt = .58;
-
 let distance = 3.6;
-
-const MIN_DISTANCE = 1.35;
-const MAX_DISTANCE = 9;
 
 const canvas = renderer.domElement;
 
-let pointers = new Map();
-let initialPinchDistance = 0;
-let initialPinchZoom = 3.6;
+canvas.addEventListener('pointerdown',e => {
 
-function getTouchDistance() {
-
-    const points = [...pointers.values()];
-
-    if (points.length < 2) return 0;
-
-    return Math.hypot(
-        points[0].x - points[1].x,
-        points[0].y - points[1].y
-    );
-}
-
-canvas.addEventListener('pointerdown', e => {
-
-    pointers.set(e.pointerId, {
-        x: e.clientX,
-        y: e.clientY
-    });
-
-    canvas.setPointerCapture(e.pointerId);
-
-    if (pointers.size === 1) {
-
-        drag = true;
-
-        px = e.clientX;
-        py = e.clientY;
-
-        mount.style.cursor = 'grabbing';
-
-    } else if (pointers.size === 2) {
-
-        drag = false;
-
-        initialPinchDistance = getTouchDistance();
-        initialPinchZoom = distance;
-    }
-
-});
-
-canvas.addEventListener('pointermove', e => {
-
-    if (!pointers.has(e.pointerId)) return;
-
-    pointers.set(e.pointerId, {
-        x: e.clientX,
-        y: e.clientY
-    });
-
-    if (pointers.size === 2) {
-
-        const currentDistance = getTouchDistance();
-
-        if (initialPinchDistance > 0) {
-
-            const scale = initialPinchDistance / currentDistance;
-
-            distance = Math.max(
-                MIN_DISTANCE,
-                Math.min(
-                    MAX_DISTANCE,
-                    initialPinchZoom * scale
-                )
-            );
-        }
-
-        return;
-    }
-
-    if (!drag || pointers.size !== 1) return;
-
-    angle += (e.clientX - px) * .007;
-
-    tilt = Math.max(
-        -1.45,
-        Math.min(
-            1.45,
-            tilt + (e.clientY - py) * .007
-        )
-    );
+    drag = true;
 
     px = e.clientX;
     py = e.clientY;
 
+    canvas.setPointerCapture(e.pointerId);
+
+    mount.style.cursor = 'grabbing';
 });
 
-function finishPointer(e) {
+canvas.addEventListener('pointermove',e => {
 
-    pointers.delete(e.pointerId);
+    if(!drag) return;
 
-    if (pointers.size === 0) {
+    angle += (e.clientX-px)*.007;
 
-        drag = false;
-        mount.style.cursor = 'grab';
+    tilt = Math.max(
+        -1.45,
+        Math.min(1.45,tilt+(e.clientY-py)*.007)
+    );
 
-    } else if (pointers.size === 1) {
+    px = e.clientX;
+    py = e.clientY;
+});
 
-        const remaining = [...pointers.values()][0];
+canvas.addEventListener('pointerup',() => {
+    drag = false;
+    mount.style.cursor = 'grab';
+});
 
-        px = remaining.x;
-        py = remaining.y;
+canvas.addEventListener('pointercancel',() => {
+    drag = false;
+    mount.style.cursor = 'grab';
+});
 
-        drag = true;
-    }
-}
-
-canvas.addEventListener('pointerup', finishPointer);
-canvas.addEventListener('pointercancel', finishPointer);
-canvas.addEventListener('lostpointercapture', finishPointer);
-
-// Zoom con rueda del mouse
-canvas.addEventListener('wheel', e => {
+canvas.addEventListener('wheel',e => {
 
     e.preventDefault();
 
     distance = Math.max(
-        MIN_DISTANCE,
-        Math.min(
-            MAX_DISTANCE,
-            distance + e.deltaY * .003
-        )
+        1.3,
+        Math.min(9,distance+e.deltaY*.003)
     );
 
-}, { passive: false });
+},{passive:false});
 
-// =====================================
-// SISTEMA DE SONIDO
-// =====================================
 
-const bands = [
-    { frequency: 130.81, height: .10 },
-    { frequency: 196, height: .36 },
-    { frequency: 261.63, height: .78 }
-];
+// ==========================================
+// SISTEMA DE AUDIO
+// ==========================================
 
-let audioContext;
+const notes = [130.81,196,261.63];
 
-async function startAudio() {
+let audio;
+let waves;
+let filter;
+let voices;
+let wavePan;
 
-    try {
+let thermalVoices;
+let cloudGain;
+let cloudFilter;
+let cloudPan;
 
-        if (!audioContext) {
+const previous = {};
 
-            const Audio = window.AudioContext || window.webkitAudioContext;
-
-            if (!Audio) {
-                alert('Tu navegador no soporta audio.');
-                return false;
-            }
-
-            audioContext = new Audio();
-
-            for (const band of bands) {
-
-                const oscillator = audioContext.createOscillator();
-
-                oscillator.type = 'sine';
-                oscillator.frequency.value = band.frequency;
-
-                band.gain = audioContext.createGain();
-                band.gain.gain.value = 0;
-
-                oscillator.connect(band.gain).connect(
-                    audioContext.destination
-                );
-
-                oscillator.start();
-            }
-        }
-
-        if (audioContext.state !== 'running') {
-            await audioContext.resume();
-        }
-
-        return audioContext.state === 'running';
-
-    } catch (error) {
-
-        console.error(
-            'No se pudo activar el audio de la aurora',
-            error
-        );
-
-        return false;
-    }
-}
-
-audioButton.addEventListener('click', async () => {
-
-    const activated = await startAudio();
-
-    if (activated) {
-
-        audioButton.textContent = 'SONIDO ACTIVADO';
-        audioButton.style.borderColor = '#55ffb0';
-
-    } else {
-
-        audioButton.textContent = 'INTENTAR DE NUEVO';
-    }
-});
-
-// =====================================
-// CAPTURA DE COLORES
-// =====================================
+let nextAudioUpdate = 0;
 
 const capture = document.createElement('canvas');
 
-capture.width = capture.height = 96;
+capture.width = capture.height = 64;
 
-const captureContext = capture.getContext('2d', {
-    willReadFrequently: true
+const pixels = capture.getContext('2d',{
+    willReadFrequently:true
 });
 
-let lastCapture = -Infinity;
 
-function readFrame() {
+async function startSound() {
 
-    captureContext.clearRect(0, 0, 96, 96);
+    if(!audio) {
 
-    captureContext.drawImage(canvas, 0, 0, 96, 96);
+        audio = new AudioContext();
 
-    return captureContext.getImageData(0, 0, 96, 96).data;
+        voices = notes.map((frequency,i) => {
+
+            const tone = audio.createOscillator();
+            const gain = audio.createGain();
+            const pan = audio.createStereoPanner();
+
+            tone.frequency.value = frequency;
+            gain.gain.value = 0;
+
+            tone.connect(gain)
+                .connect(pan)
+                .connect(audio.destination);
+
+            tone.start();
+
+            return {
+                gain:gain.gain,
+                pan:pan.pan,
+                hue:[140,189,320][i]
+            };
+        });
+
+        const buffer = audio.createBuffer(
+            1,
+            audio.sampleRate*4,
+            audio.sampleRate
+        );
+
+        const samples = buffer.getChannelData(0);
+
+        for(let i=0;i<samples.length;i++) {
+            samples[i] = Math.random()*2-1;
+        }
+
+        // SONIDO DEL MAR
+
+        const noise = audio.createBufferSource();
+
+        noise.buffer = buffer;
+        noise.loop = true;
+
+        filter = audio.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.Q.value = .45;
+
+        waves = audio.createGain();
+        waves.gain.value = 0;
+
+        wavePan = audio.createStereoPanner();
+
+        noise.connect(filter)
+            .connect(waves)
+            .connect(wavePan)
+            .connect(audio.destination);
+
+        noise.start();
+
+        // SONIDO DE LAS NUBES
+
+        const cloudNoise = audio.createBufferSource();
+
+        cloudNoise.buffer = buffer;
+        cloudNoise.loop = true;
+
+        cloudFilter = audio.createBiquadFilter();
+        cloudFilter.type = 'bandpass';
+        cloudFilter.Q.value = .7;
+
+        cloudGain = audio.createGain();
+        cloudGain.gain.value = 0;
+
+        cloudPan = audio.createStereoPanner();
+
+        cloudNoise.connect(cloudFilter)
+            .connect(cloudGain)
+            .connect(cloudPan)
+            .connect(audio.destination);
+
+        cloudNoise.start(0,1.7);
+
+        // TEMPERATURA CONTINENTAL
+
+        thermalVoices = [77.78,98.00,116.54].map(frequency => {
+
+            const oscillator = audio.createOscillator();
+            const gain = audio.createGain();
+            const pan = audio.createStereoPanner();
+
+            oscillator.frequency.value = frequency;
+            gain.gain.value = 0;
+
+            oscillator.connect(gain)
+                .connect(pan)
+                .connect(audio.destination);
+
+            oscillator.start();
+
+            return {
+                volume:gain.gain,
+                pan:pan.pan
+            };
+        });
+    }
+
+    await audio.resume();
 }
 
-// =====================================
-// ANÁLISIS DE LUZ Y SONIDO
-// =====================================
 
-function renderWithAudio(time) {
+// ==========================================
+// CAPTURA DE PIXELES
+// ==========================================
 
-    const sample =
-        audioContext?.state === 'running' &&
-        time - lastCapture >= .1;
+function framePixels() {
 
-    let background;
+    pixels.drawImage(canvas,0,0,64,64);
 
-    if (sample) {
+    return pixels.getImageData(0,0,64,64).data;
+}
 
-        aurora.visible = false;
 
-        try {
+function measure(effect,full,base) {
 
-            renderer.render(scene, camera);
+    const old = previous[effect];
 
-            background = readFrame();
+    const levels = new Float32Array(full.length/4);
 
-        } finally {
+    let energy = 0;
+    let movement = 0;
+    let horizontal = 0;
+    let blue = 0;
+    let chroma = 0;
 
-            aurora.visible = true;
+    for(let j=0;j<levels.length;j++) {
+
+        const i = j*4;
+
+        const r = Math.abs(full[i]-base[i]);
+        const g = Math.abs(full[i+1]-base[i+1]);
+        const b = Math.abs(full[i+2]-base[i+2]);
+
+        const level = Math.max(r,g,b)/255;
+
+        levels[j] = level;
+
+        energy += level;
+
+        if(old) {
+            movement += Math.abs(level-old[j]);
+        }
+
+        horizontal += level*(2*(j%64)/63-1);
+
+        blue += b;
+        chroma += r+g+b;
+    }
+
+    previous[effect] = levels;
+
+    return {
+        energy,
+        movement,
+        blue:blue/Math.max(1,chroma),
+        pan:Math.max(-1,Math.min(1,
+            1.5*horizontal/Math.max(1,energy)))
+    };
+}
+
+
+// ==========================================
+// SONIDO DE LAS OLAS
+// ==========================================
+
+function setNoise(effect,full,base,gain,tone,stereo,now) {
+
+    const {energy,movement,blue,pan} =
+        measure(effect,full,base);
+
+    const strength = 1-Math.exp(-energy/45);
+    const accent = 1-Math.exp(-movement/30);
+
+    gain.gain.setTargetAtTime(
+        strength*(.10+.35*accent),
+        now,
+        .13
+    );
+
+    tone.frequency.setTargetAtTime(
+        320+1150*blue+900*accent,
+        now,
+        .15
+    );
+
+    stereo.pan.setTargetAtTime(pan,now,.18);
+}
+
+
+// ==========================================
+// SONIDO DE TEMPERATURA
+// ==========================================
+
+function thermalWeights(full,base,i) {
+
+    const red = Math.max(0,full[i]-base[i]);
+    const green = Math.max(0,full[i+1]-base[i+1]);
+    const blue = Math.max(0,full[i+2]-base[i+2]);
+
+    const r = red/Math.max(24,255-base[i]);
+    const g = green/Math.max(24,255-base[i+1]);
+    const b = blue/Math.max(24,255-base[i+2]);
+
+    const level = Math.min(1,Math.max(red,green,blue)/255);
+
+    const cold = Math.max(
+        0,
+        Math.min(1,(b-r)/Math.max(.01,b+r)*2.5)
+    );
+
+    const warm = (1-cold)*Math.max(
+        0,
+        Math.min(1,(r-b)/Math.max(.01,r+b)*2.5)
+    );
+
+    const yellow = Math.max(
+        0,
+        Math.min(1,(g/Math.max(.01,r)-.50)/.28)
+    );
+
+    return [
+        level*cold,
+        level*warm*yellow,
+        level*warm*(1-yellow)
+    ];
+}
+
+
+function updateTemperature(full,base,now) {
+
+    const old = previous.temperature;
+
+    const count = thermalVoices.length;
+
+    const levels = new Float32Array(full.length/4*count);
+
+    const energy = [0,0,0];
+    const motion = [0,0,0];
+    const horizontal = [0,0,0];
+
+    for(let i=0,j=0;i<full.length;i+=4,j+=count) {
+
+        const weights = thermalWeights(full,base,i);
+
+        const x = 2*((i/4)%64)/63-1;
+
+        for(let k=0;k<count;k++) {
+
+            const level = weights[k];
+
+            levels[j+k] = level;
+
+            energy[k] += level;
+
+            horizontal[k] += level*x;
+
+            if(old) {
+                motion[k] += Math.abs(level-old[j+k]);
+            }
         }
     }
 
-    renderer.render(scene, camera);
+    previous.temperature = levels;
 
-    if (!sample) return;
+    thermalVoices.forEach((voice,k) => {
 
-    lastCapture = time;
+        const accent = 1+.3*(1-Math.exp(-motion[k]/10));
 
-    const full = readFrame();
+        voice.volume.setTargetAtTime(
+            .064*(1-Math.exp(-energy[k]/22))*accent,
+            now,
+            .16
+        );
 
-    const pixels = new Uint8Array(96 * 96 * 3);
+        const pan = 1.5*horizontal[k]/Math.max(1,energy[k]);
 
-    for (let i = 0, j = 0; i < full.length; i += 4) {
-
-        for (let channel = 0; channel < 3; channel++) {
-
-            pixels[j++] = Math.max(
-                0,
-                full[i + channel] - background[i + channel]
-            );
-        }
-    }
-
-    const volumes = pixelVolumes(pixels);
-
-    bands.forEach((band, i) => {
-
-        band.gain.gain.setTargetAtTime(
-            volumes[i],
-            audioContext.currentTime,
-            .12
+        voice.pan.setTargetAtTime(
+            Math.max(-1,Math.min(1,pan)),
+            now,
+            .18
         );
     });
 }
 
-// =====================================
-// ANÁLISIS RGB Y HSV
-// =====================================
 
-function pixelVolumes(frame) {
+// ==========================================
+// SONIDO DE NUBES
+// ==========================================
 
-    const energy = [0, 0, 0];
+function updateCloudSound(full,base,now) {
 
-    const shades = [140, 189, 320];
+    const {energy,movement,blue,pan} =
+        measure('clouds',full,base);
 
-    for (let offset = 0; offset < frame.length; offset += 3) {
+    const brightness = 1-Math.exp(-energy/24);
+    const drift = 1-Math.exp(-movement/14);
 
-        const red = frame[offset] / 255;
-        const green = frame[offset + 1] / 255;
-        const blue = frame[offset + 2] / 255;
+    cloudGain.gain.setTargetAtTime(
+        brightness*(.18+.10*drift),
+        now,
+        .28
+    );
 
-        const max = Math.max(red, green, blue);
-        const min = Math.min(red, green, blue);
+    cloudFilter.frequency.setTargetAtTime(
+        430+380*blue+240*drift,
+        now,
+        .3
+    );
 
-        const delta = max - min;
+    cloudPan.pan.setTargetAtTime(pan,now,.28);
+}
 
-        const level = max * 255;
 
-        if (level < 10) continue;
+// ==========================================
+// PROCESAMIENTO DEL AUDIO
+// ==========================================
 
-        let hue = 0;
+function renderSound() {
 
-        const saturation = max === 0 ? 0 : delta / max;
+    const active = audio?.state === 'running';
 
-        if (delta !== 0) {
+    const effects = [
 
-            if (max === red) {
+        {
+            name:'aurora',
+            object:aurora,
+            key:'visible',
+            off:false
+        },
 
-                hue = ((green - blue) / delta) % 6;
+        {
+            name:'waves',
+            object:uniforms.uStrength,
+            key:'value',
+            off:0
+        },
 
-            } else if (max === green) {
+        {
+            name:'temperature',
+            object:uniforms.uTemperature,
+            key:'value',
+            off:0
+        },
 
-                hue = (blue - red) / delta + 2;
+        {
+            name:'clouds',
+            object:cloudCover,
+            key:'value',
+            off:0
+        }
+    ];
 
-            } else {
+    const sampled = {};
 
-                hue = (red - green) / delta + 4;
+    if(active && audio.currentTime>=nextAudioUpdate) {
+
+        nextAudioUpdate = audio.currentTime+.12;
+
+        for(const effect of effects) {
+
+            const value = effect.object[effect.key];
+
+            if(!value) {
+
+                delete previous[effect.name];
+
+                continue;
             }
 
-            hue *= 60;
+            effect.object[effect.key] = effect.off;
 
-            if (hue < 0) hue += 360;
-        }
+            try {
 
-        for (let index = 0; index < shades.length; index++) {
+                renderer.render(scene,camera);
 
-            const distanceHue = Math.abs(
-                ((hue - shades[index] + 180) % 360 + 360) % 360 - 180
-            );
+                sampled[effect.name] = framePixels();
 
-            const weight = Math.max(0, 1 - distanceHue / 65);
+            } finally {
 
-            energy[index] +=
-                weight * saturation * level / 255;
+                effect.object[effect.key] = value;
+            }
         }
     }
 
-    return energy.map(total =>
-        0.18 * (1 - Math.exp(-total / 50))
-    );
+    renderer.render(scene,camera);
+
+    if(!active) return;
+
+    const now = audio.currentTime;
+
+    if(!uniforms.uStrength.value) {
+        waves.gain.setTargetAtTime(0,now,.07);
+    }
+
+    if(!aurora.visible) {
+
+        for(const voice of voices) {
+            voice.gain.setTargetAtTime(0,now,.07);
+        }
+    }
+
+    if(!cloudCover.value) {
+        cloudGain.gain.setTargetAtTime(0,now,.09);
+    }
+
+    if(!uniforms.uTemperature.value) {
+
+        for(const voice of thermalVoices) {
+            voice.volume.setTargetAtTime(0,now,.07);
+        }
+    }
+
+    if(!Object.keys(sampled).length) return;
+
+    const full = framePixels();
+
+    if(sampled.waves) {
+        setNoise(
+            'waves',
+            full,
+            sampled.waves,
+            waves,
+            filter,
+            wavePan,
+            now
+        );
+    }
+
+    if(sampled.clouds) {
+        updateCloudSound(full,sampled.clouds,now);
+    }
+
+    if(sampled.temperature) {
+        updateTemperature(full,sampled.temperature,now);
+    }
+
+    const background = sampled.aurora;
+
+    if(!background) return;
+
+    const change = measure('aurora',full,background).movement;
+
+    const energy = [0,0,0];
+    const weightedX = [0,0,0];
+
+    for(let i=0;i<full.length;i+=4) {
+
+        const r = Math.max(0,full[i]-background[i]);
+        const g = Math.max(0,full[i+1]-background[i+1]);
+        const b = Math.max(0,full[i+2]-background[i+2]);
+
+        const max = Math.max(r,g,b);
+
+        const spread = max-Math.min(r,g,b);
+
+        if(max<8 || spread<4) continue;
+
+        const sector = max===r
+            ? (g-b)/spread
+            : max===g
+                ? 2+(b-r)/spread
+                : 4+(r-g)/spread;
+
+        const hue = (sector*60+360)%360;
+
+        const x = 2*((i/4)%64)/63-1;
+
+        voices.forEach((voice,j) => {
+
+            const distance = Math.abs(
+                (hue-voice.hue+540)%360-180
+            );
+
+            const weight = Math.max(0,1-distance/65)*spread/255;
+
+            energy[j] += weight;
+
+            weightedX[j] += weight*x;
+        });
+    }
+
+    voices.forEach((voice,i) => {
+
+        const level = energy[i];
+
+        const pan = level
+            ? Math.max(-1,Math.min(1,1.6*weightedX[i]/level))
+            : 0;
+
+        voice.gain.setTargetAtTime(
+            .11*[1,.8,.6][i]*
+            (1-Math.exp(-level/16))*
+            (1+.25*(1-Math.exp(-change/18))),
+            now,
+            .12
+        );
+
+        voice.pan.setTargetAtTime(pan,now,.16);
+    });
 }
 
-// =====================================
-// RESPONSIVE
-// =====================================
+
+// ==========================================
+// ACTIVAR AUDIO CON INTERACCION DEL USUARIO
+// ==========================================
+
+for(const target of [
+    canvas,
+    document.getElementById('toggle-water'),
+    document.getElementById('toggle-aurora'),
+    document.getElementById('toggle-temperature'),
+    document.getElementById('toggle-clouds')
+]) {
+
+    target.addEventListener('click',() => {
+        startSound().catch(console.error);
+    });
+}
+
+
+// ==========================================
+// REDIMENSIONAR PANTALLA
+// ==========================================
 
 function resize() {
 
@@ -879,18 +1426,22 @@ function resize() {
 
     camera.aspect = w / h;
 
+    // Mantener la cámara mirando al centro de la Tierra
+    camera.lookAt(0, 0, 0);
+
     camera.updateProjectionMatrix();
 
     renderer.setSize(w, h, false);
 }
 
-window.addEventListener('resize', resize);
+window.addEventListener('resize',resize);
 
 resize();
 
-// =====================================
-// ANIMACIÓN PRINCIPAL
-// =====================================
+
+// ==========================================
+// ANIMACION PRINCIPAL
+// ==========================================
 
 const clock = new THREE.Clock();
 
@@ -898,24 +1449,38 @@ function animate() {
 
     requestAnimationFrame(animate);
 
-    const dt = Math.min(clock.getDelta(), .05);
+    const dt = Math.min(clock.getDelta(),.05);
 
+    // Rotación de la Tierra
     globe.rotation.y = angle;
     globe.rotation.x = tilt;
 
-    uniforms.uTime.value += dt;
+    if(uniforms.uStrength.value>0) {
+        uniforms.uTime.value += dt;
+    }
 
-    auroraUniforms.time.value += dt;
+    if(aurora.visible) {
+        auroraUniforms.time.value += dt;
+    }
 
-    camera.position.z +=
-        (distance - camera.position.z) * .12;
+    if(uniforms.uTemperature.value) {
+        uniforms.uThermalTime.value += dt;
+    }
 
-    renderWithAudio(auroraUniforms.time.value);
+    if(cloudLayer.visible) {
+        cloudTime.value += dt;
+    }
+
+    // Zoom progresivo
+    camera.position.z += (distance-camera.position.z)*.12;
+
+    // Renderizado y sincronización del sonido
+    renderSound();
 }
 
 animate();
 
-} catch (e) {
+}catch(e) {
 
     console.error(e);
 
@@ -926,8 +1491,9 @@ animate();
             text-align:center;
             padding:30px;
         ">
-            No se pudo cargar la experiencia 3D.
-            Revisa tu conexión a internet e intenta nuevamente.
+            <h2>No se pudo cargar la Tierra 3D</h2>
+            <p>Comprueba tu conexión a Internet y recarga la página.</p>
+            <p>Consulta la consola del navegador para ver el error.</p>
         </div>
     `;
 }
