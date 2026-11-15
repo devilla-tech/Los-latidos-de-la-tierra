@@ -15,18 +15,20 @@
     box-sizing: border-box;
 }
 
+html {
+    min-height: 100%;
+    scroll-behavior: smooth;
+}
+
 body {
-    width: 100%;
     min-height: 100vh;
-    overflow: hidden;
+    overflow-x: hidden;
     background: #020711;
     color: white;
     font-family: 'Montserrat', sans-serif;
 }
 
-/* =========================
-   FONDO ESPACIAL Y AURORAS
-========================= */
+/* FONDO ESPACIAL */
 
 .fondo-aurora {
     position: fixed;
@@ -47,7 +49,7 @@ body {
     top: -15%;
     left: -25%;
     filter: blur(45px);
-    opacity: 0.5;
+    opacity: .5;
     animation: movimientoAurora 14s ease-in-out infinite alternate;
 }
 
@@ -64,7 +66,7 @@ body {
         #42ff7655 48%, #8c52ff55 62%,
         transparent 80%);
     animation-duration: 19s;
-    opacity: 0.4;
+    opacity: .4;
 }
 
 .aurora-3 {
@@ -73,7 +75,7 @@ body {
         #00ff9955 50%, #b000ff44 65%,
         transparent 85%);
     animation-duration: 23s;
-    opacity: 0.35;
+    opacity: .35;
 }
 
 @keyframes movimientoAurora {
@@ -98,14 +100,12 @@ body {
     opacity: .5;
 }
 
-/* =========================
-   BOTÓN MENÚ
-========================= */
+/* MENÚ SUPERIOR */
 
 .menu-boton {
     position: fixed;
-    top: 24px;
-    left: 24px;
+    top: 22px;
+    left: 22px;
     z-index: 20;
     width: 46px;
     height: 46px;
@@ -116,10 +116,10 @@ body {
     font-size: 24px;
     cursor: pointer;
     backdrop-filter: blur(12px);
-    transition: .3s;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: .3s;
 }
 
 .menu-boton:hover {
@@ -127,25 +127,22 @@ body {
     box-shadow: 0 0 18px #168bff88;
 }
 
-/* =========================
-   ENCABEZADO CENTRADO
-========================= */
+/* TÍTULO */
 
 header {
     position: absolute;
     top: 22px;
     left: 0;
-    right: 0;
     width: 100%;
-    padding: 0 75px;
+    padding: 0 85px;
     text-align: center;
     z-index: 2;
     pointer-events: none;
 }
 
-h1 {
+header h1 {
     font-family: 'Teko', sans-serif;
-    font-size: clamp(38px, 6vw, 65px);
+    font-size: clamp(35px, 5vw, 65px);
     letter-spacing: 4px;
     color: white;
     text-shadow: 0 0 18px #168bff;
@@ -153,52 +150,49 @@ h1 {
 }
 
 header p {
-    font-size: clamp(9px, 2vw, 13px);
+    font-size: clamp(9px, 1.5vw, 13px);
     letter-spacing: 3px;
     color: #a9d9ff;
     margin-top: 3px;
 }
 
-/* =========================
-   CONTENIDO PRINCIPAL
-========================= */
+/* CONTENIDO */
 
 .contenedor {
+    position: relative;
+    z-index: 1;
     width: 100%;
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    position: relative;
-    padding: 110px 15px 75px;
-    z-index: 1;
+    padding: 135px 20px 35px;
 }
 
-/* =========================
-   TIERRA 3D
-========================= */
+/* TIERRA */
 
 #tierra {
     width: min(65vw, 520px);
     height: min(65vw, 520px);
-    max-height: 52vh;
+    max-height: 55vh;
     position: relative;
-    z-index: 1;
+    flex-shrink: 0;
 }
 
 #tierra canvas {
+    display: block;
     width: 100%;
     height: 100%;
-    display: block;
 }
 
-/* =========================
-   BOTÓN INICIAR
-========================= */
+/* BOTÓN INICIAR */
 
 .boton-iniciar {
-    margin-top: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 15px;
     padding: 15px 55px;
     border: 1px solid #45baff;
     border-radius: 40px;
@@ -211,7 +205,7 @@ header p {
     cursor: pointer;
     box-shadow: 0 0 15px #087bdc;
     transition: .3s ease;
-    z-index: 2;
+    text-decoration: none;
 }
 
 .boton-iniciar:hover {
@@ -219,21 +213,46 @@ header p {
     box-shadow: 0 0 30px #159dff;
 }
 
-.boton-iniciar a {
-    text-decoration: none;
-    color: white;
+/* FOOTER */
+
+footer {
+    position: relative;
+    z-index: 5;
+    width: 100%;
+    padding: 20px 15px;
+    background: linear-gradient(90deg, #020711ee, #09213bee, #020711ee);
+    border-top: 1px solid #45baff33;
+    backdrop-filter: blur(12px);
 }
 
-/* =========================
-   MENÚ LATERAL
-========================= */
+.footer-contenido {
+    max-width: 1100px;
+    margin: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px 15px;
+    text-align: center;
+    color: #9ebbd5;
+    font-size: 10px;
+    line-height: 1.7;
+    letter-spacing: 1px;
+}
+
+.footer-nombre {
+    color: #70c7ff;
+    font-weight: 700;
+}
+
+/* OVERLAY */
 
 .overlay {
     position: fixed;
     inset: 0;
-    background: #0009;
-    backdrop-filter: blur(3px);
     z-index: 29;
+    background: #000a;
+    backdrop-filter: blur(3px);
     opacity: 0;
     visibility: hidden;
     transition: .3s;
@@ -244,20 +263,25 @@ header p {
     visibility: visible;
 }
 
+/* MENÚ LATERAL */
+
 .menu-lateral {
     position: fixed;
     top: 0;
     left: 0;
-    width: min(350px, 85%);
+    width: min(370px, 88%);
     height: 100vh;
+    height: 100dvh;
     z-index: 30;
-    padding: 35px 25px;
-    background: linear-gradient(160deg, #071b35f5, #020711fa);
+    padding: 35px 25px 45px;
+    background: linear-gradient(160deg, #071b35f7, #020711fc);
     border-right: 1px solid #45baff55;
     backdrop-filter: blur(20px);
     transform: translateX(-105%);
     transition: transform .4s ease;
     overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
 .menu-lateral.activo {
@@ -267,11 +291,13 @@ header p {
 .cerrar-menu {
     position: absolute;
     right: 20px;
-    top: 20px;
+    top: 15px;
+    width: 35px;
+    height: 35px;
     background: transparent;
     color: white;
     border: none;
-    font-size: 28px;
+    font-size: 30px;
     cursor: pointer;
 }
 
@@ -279,20 +305,21 @@ header p {
     font-family: 'Teko', sans-serif;
     font-size: 30px;
     letter-spacing: 2px;
+    line-height: 1.2;
     color: #75caff;
-    margin-bottom: 5px;
-    padding-right: 20px;
+    padding-right: 25px;
 }
 
 .menu-subtitulo {
     color: #9dbbd3;
     font-size: 10px;
     letter-spacing: 2px;
-    margin-bottom: 35px;
+    margin-top: 5px;
+    margin-bottom: 25px;
 }
 
 .menu-seccion {
-    margin-bottom: 28px;
+    margin-bottom: 25px;
 }
 
 .menu-seccion h3 {
@@ -307,6 +334,7 @@ header p {
     font-size: 12px;
     line-height: 1.9;
     color: #c2d5e8;
+    overflow-wrap: anywhere;
 }
 
 .menu-enlace {
@@ -319,6 +347,7 @@ header p {
     margin: 15px 0;
     transition: .3s;
     overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .menu-enlace:hover {
@@ -327,8 +356,8 @@ header p {
 }
 
 .menu-icono {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     flex-shrink: 0;
     display: flex;
     justify-content: center;
@@ -343,69 +372,40 @@ header p {
     width: 100%;
     height: 1px;
     background: #45baff33;
-    margin: 25px 0;
+    margin: 23px 0;
 }
 
-/* =========================
-   FOOTER
-========================= */
+/* TABLETS */
 
-footer {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    padding: 15px 20px;
-    background: linear-gradient(90deg, #020711cc, #09213bcc, #020711cc);
-    border-top: 1px solid #45baff33;
-    backdrop-filter: blur(12px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    z-index: 5;
+@media (max-width: 900px) {
+    #tierra {
+        width: min(75vw, 480px);
+        height: min(75vw, 480px);
+    }
+
+    header h1 {
+        letter-spacing: 2px;
+    }
 }
 
-.footer-contenido {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 8px 20px;
-    color: #9ebbd5;
-    font-size: 10px;
-    letter-spacing: 1px;
-}
-
-.footer-nombre {
-    color: #70c7ff;
-    font-weight: 600;
-}
-
-.footer-separador {
-    color: #45baff;
-}
-
-/* =========================
-   RESPONSIVE
-========================= */
+/* CELULARES */
 
 @media (max-width: 600px) {
 
     .menu-boton {
-        top: 15px;
-        left: 15px;
+        top: 14px;
+        left: 14px;
         width: 42px;
         height: 42px;
     }
 
     header {
         top: 17px;
-        padding: 0 55px;
+        padding: 0 60px;
     }
 
-    h1 {
-        font-size: clamp(24px, 6vw, 36px);
+    header h1 {
+        font-size: clamp(23px, 6vw, 35px);
         letter-spacing: 1px;
     }
 
@@ -415,60 +415,106 @@ footer {
     }
 
     .contenedor {
-        padding-top: 100px;
-        padding-bottom: 65px;
+        min-height: 100svh;
+        padding: 115px 12px 40px;
     }
 
     #tierra {
-        width: 90vw;
-        height: 90vw;
-        max-height: 45vh;
+        width: min(88vw, 420px);
+        height: min(88vw, 420px);
+        max-height: 48vh;
     }
 
     .boton-iniciar {
-        margin-top: 15px;
-        padding: 13px 40px;
+        margin-top: 12px;
+        padding: 13px 42px;
+        font-size: 12px;
     }
 
     footer {
-        padding: 12px 8px;
+        padding: 17px 12px;
     }
 
     .footer-contenido {
-        font-size: 8px;
-        gap: 5px 9px;
+        flex-direction: column;
+        gap: 5px;
+        font-size: 9px;
     }
 
-    .aurora {
-        filter: blur(30px);
+    .footer-separador {
+        display: none;
+    }
+
+    .menu-lateral {
+        width: min(350px, 90%);
+        padding: 30px 22px 40px;
+    }
+}
+
+/* PANTALLAS MUY PEQUEÑAS */
+
+@media (max-width: 360px) {
+
+    header {
+        padding: 0 55px;
+    }
+
+    header h1 {
+        font-size: 22px;
+    }
+
+    header p {
+        font-size: 7px;
+    }
+
+    #tierra {
+        width: 85vw;
+        height: 85vw;
+    }
+
+    .menu-logo {
+        font-size: 26px;
     }
 }
 
 /* PANTALLAS BAJAS */
 
-@media (max-height: 650px) {
+@media (max-height: 650px) and (min-width: 601px) {
 
     .contenedor {
-        padding-top: 85px;
-        padding-bottom: 55px;
+        padding-top: 100px;
+        padding-bottom: 25px;
     }
 
     header {
         top: 10px;
     }
 
-    h1 {
-        font-size: 35px;
+    header h1 {
+        font-size: 38px;
     }
 
     #tierra {
-        max-height: 40vh;
+        width: min(45vh, 380px);
+        height: min(45vh, 380px);
+        max-height: 45vh;
+    }
+
+    .boton-iniciar {
+        margin-top: 8px;
     }
 }
+
+/* MOVIMIENTO REDUCIDO */
 
 @media (prefers-reduced-motion: reduce) {
     .aurora {
         animation: none;
+    }
+
+    * {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
     }
 }
 </style>
@@ -476,7 +522,7 @@ footer {
 
 <body>
 
-<!-- FONDO AURORAS -->
+<!-- FONDO -->
 
 <div class="fondo-aurora">
     <div class="aurora aurora-1"></div>
@@ -496,7 +542,7 @@ footer {
 
 <div class="overlay" id="overlay"></div>
 
-<!-- PANEL LATERAL -->
+<!-- MENÚ LATERAL COMPLETO -->
 
 <aside class="menu-lateral" id="menuLateral">
 
@@ -512,21 +558,33 @@ footer {
         <h3>Sobre el proyecto</h3>
         <p>
             Los latidos de la Tierra es una experiencia interactiva
-            diseñada para acercar a las personas al conocimiento
-            de nuestro planeta mediante tecnología, sonidos y
-            recursos digitales accesibles.
+            que busca acercar a las personas al conocimiento de
+            nuestro planeta mediante tecnología, sonidos y recursos
+            digitales accesibles.
         </p>
     </section>
 
     <div class="menu-linea"></div>
 
     <section class="menu-seccion">
-        <h3>Objetivo</h3>
+        <h3>Objetivo del proyecto</h3>
         <p>
-            Crear una experiencia inclusiva que permita explorar
+            Desarrollar una experiencia inclusiva que permita explorar
             y conocer nuestro planeta mediante estímulos auditivos
             y elementos interactivos, especialmente pensada para
             personas con discapacidad visual.
+        </p>
+    </section>
+
+    <div class="menu-linea"></div>
+
+    <section class="menu-seccion">
+        <h3>¿Qué encontrarás?</h3>
+        <p>
+            Una representación interactiva de la Tierra, sonidos
+            ambientales y contenido diseñado para ofrecer una
+            experiencia de exploración diferente, combinando
+            tecnología, naturaleza y accesibilidad.
         </p>
     </section>
 
@@ -537,12 +595,12 @@ footer {
 
         <a class="menu-enlace" href="mailto:TU_CORREO@ejemplo.com">
             <span class="menu-icono">✉</span>
-            TU_CORREO@ejemplo.com
+            <span>TU_CORREO@ejemplo.com</span>
         </a>
 
         <a class="menu-enlace" href="tel:+520000000000">
             <span class="menu-icono">☎</span>
-            +52 000 000 0000
+            <span>+52 000 000 0000</span>
         </a>
 
         <a class="menu-enlace"
@@ -550,7 +608,7 @@ footer {
            target="_blank"
            rel="noopener noreferrer">
             <span class="menu-icono">⌘</span>
-            GitHub
+            <span>GitHub</span>
         </a>
     </section>
 
@@ -559,9 +617,31 @@ footer {
     <section class="menu-seccion">
         <h3>Acerca de</h3>
         <p>
-            Una propuesta que combina tecnología, innovación
-            y accesibilidad para descubrir las maravillas
-            de nuestro planeta.
+            Este proyecto representa una propuesta de innovación
+            tecnológica enfocada en la inclusión y la accesibilidad.
+            Su propósito es demostrar cómo las herramientas digitales
+            pueden convertirse en medios para aprender, experimentar
+            y descubrir el mundo de una manera diferente.
+        </p>
+    </section>
+
+    <div class="menu-linea"></div>
+
+    <section class="menu-seccion">
+        <h3>Desarrollo del proyecto</h3>
+        <p>
+            Una propuesta que combina diseño web, visualización
+            tridimensional, recursos multimedia y principios de
+            accesibilidad para crear una experiencia educativa.
+        </p>
+    </section>
+
+    <div class="menu-linea"></div>
+
+    <section class="menu-seccion">
+        <h3>Gracias por visitarnos</h3>
+        <p>
+            Explora, escucha y descubre los latidos de nuestro planeta.
         </p>
     </section>
 
@@ -569,7 +649,7 @@ footer {
 
 <!-- CONTENIDO PRINCIPAL -->
 
-<div class="contenedor">
+<main class="contenedor">
 
     <header>
         <h1>LOS LATIDOS DE LA TIERRA</h1>
@@ -578,23 +658,29 @@ footer {
 
     <div id="tierra"></div>
 
-    <button class="boton-iniciar">
-        <a href="main.html">INICIAR</a>
-    </button>
+    <a href="main.html" class="boton-iniciar">
+        INICIAR
+    </a>
 
-    <!-- FOOTER -->
+</main>
 
-    <footer>
-        <div class="footer-contenido">
-            <span class="footer-nombre">LOS LATIDOS DE LA TIERRA</span>
-            <span class="footer-separador">|</span>
-            <span>TECNOLOGÍA E INCLUSIÓN</span>
-            <span class="footer-separador">|</span>
-            <span>© 2026 TODOS LOS DERECHOS RESERVADOS</span>
-        </div>
-    </footer>
+<!-- FOOTER -->
 
-</div>
+<footer>
+    <div class="footer-contenido">
+        <span class="footer-nombre">
+            LOS LATIDOS DE LA TIERRA
+        </span>
+
+        <span class="footer-separador">|</span>
+
+        <span>TECNOLOGÍA E INCLUSIÓN</span>
+
+        <span class="footer-separador">|</span>
+
+        <span>© 2026 TODOS LOS DERECHOS RESERVADOS</span>
+    </div>
+</footer>
 
 <!-- FUNCIONAMIENTO DEL MENÚ -->
 
@@ -621,7 +707,9 @@ cerrarMenu.addEventListener('click', cerrarPanel);
 overlay.addEventListener('click', cerrarPanel);
 
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') cerrarPanel();
+    if (e.key === 'Escape') {
+        cerrarPanel();
+    }
 });
 </script>
 
@@ -631,6 +719,7 @@ document.addEventListener('keydown', (e) => {
 import * as THREE from 'https://esm.sh/three@0.160.1';
 
 const contenedor = document.getElementById('tierra');
+
 const escena = new THREE.Scene();
 
 const camara = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
@@ -652,7 +741,7 @@ const luzSolar = new THREE.DirectionalLight(0xffffff, 2.8);
 luzSolar.position.set(-4, 2, 5);
 escena.add(luzSolar);
 
-// PLANETA
+// GRUPO DE LA TIERRA
 
 const planetaGrupo = new THREE.Group();
 escena.add(planetaGrupo);
@@ -762,14 +851,20 @@ cargador.load(
         }
 
         animar();
+    },
+    undefined,
+    (error) => {
+        console.error('No se pudo cargar la textura de la Tierra:', error);
     }
 );
 
-// AJUSTAR PANTALLA
+// AJUSTAR TAMAÑO
 
 function ajustarPantalla() {
     const ancho = contenedor.clientWidth;
     const alto = contenedor.clientHeight;
+
+    if (!ancho || !alto) return;
 
     camara.aspect = ancho / alto;
     camara.updateProjectionMatrix();
@@ -777,7 +872,9 @@ function ajustarPantalla() {
     renderizador.setSize(ancho, alto);
 }
 
-window.addEventListener('resize', ajustarPantalla);
+const observador = new ResizeObserver(ajustarPantalla);
+observador.observe(contenedor);
+
 ajustarPantalla();
 
 </script>
