@@ -2048,8 +2048,7 @@ const translations = {
         languageSelector: "Selector de idioma",
         planetDescription: "Planeta Tierra en tres dimensiones. Arrastra para girar y usa la rueda o los controles para acercar.",
 
-        hint: "Explora la Tierra: arrastra para girar, usa la rueda del mouse o los botones + y − para acercar. Activa un efecto para escuchar su sonificación.",
-
+       
         effects: "Efectos del planeta",
 
         aurora: "Aurora boreal",
@@ -2081,8 +2080,7 @@ const translations = {
         languageSelector: "Language selector",
         planetDescription: "Three-dimensional planet Earth. Drag to rotate and use the mouse wheel or controls to zoom.",
 
-        hint: "Explore Earth: drag to rotate, use the mouse wheel or the + and − buttons to zoom. Activate an effect to hear its sonification.",
-
+       
         effects: "Planet effects",
 
         aurora: "Northern lights",
@@ -2202,7 +2200,7 @@ function changeLanguage(language) {
     document.getElementById("zoom-out")
         .setAttribute("aria-label", t.zoomOut);
 
-    /* Guardar idioma seleccionado */
+  
 
     try {
         localStorage.setItem("idiomaTierra3D", language);
