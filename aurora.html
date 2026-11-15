@@ -74,6 +74,51 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#05060d;col
   top:10px;
   left:10px;
  }
+}/* CUADRO DE NARRACIÓN */
+
+.narration-box {
+    position: fixed;
+    z-index: 5;
+    left: 50%;
+    bottom: 25px;
+    transform: translateX(-50%);
+    width: min(650px, calc(100vw - 30px));
+    padding: 16px 20px;
+    border: 1px solid rgba(121, 231, 207, .65);
+    border-radius: 14px;
+    background: rgba(8, 16, 32, .94);
+    color: #eaf7ff;
+    font-size: 14px;
+    line-height: 1.7;
+    text-align: center;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 0 25px rgba(70, 210, 190, .15);
+    display: none;
+    animation: narrationAppear .35s ease;
+}
+
+.narration-box.visible {
+    display: block;
+}
+
+@keyframes narrationAppear {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 12px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+@media(max-width:600px) {
+    .narration-box {
+        bottom: 65px;
+        padding: 12px 14px;
+        font-size: 12px;
+        line-height: 1.5;
+    }
 }
 </style>
 </head>
@@ -85,7 +130,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#05060d;col
 <div id="scene" aria-label="Planeta Tierra en tres dimensiones. Arrastra para girar y usa la rueda o los controles para acercar."></div>
 
 <div class="hint">Explora la Tierra: arrastra para girar, usa la rueda del mouse o los botones + y − para acercar. Activa un efecto para escuchar su sonificación.</div>
-
+<div id="narration-box" class="narration-box" aria-live="polite"></div>
 <div class="effects" role="group" aria-label="Efectos del planeta">
   <button type="button" id="toggle-aurora" aria-pressed="false">Aurora boreal <span class="effect-arrow" aria-hidden="true">▸</span></button>
   <button type="button" id="toggle-water" aria-pressed="false">Olas del mar <span class="effect-arrow" aria-hidden="true">▸</span></button>
@@ -531,33 +576,338 @@ globe.add(aurora);
    BOTONES DE EFECTOS
 ========================= */
 
-function bindEffect(id,apply){
- const button=document.getElementById(id);
 
- apply(button.getAttribute('aria-pressed')==='true');
+/* =========================
+   EFECTOS Y NARRACIONES
+========================= */
 
- button.addEventListener('click',()=>{
-  const enabled=button.getAttribute('aria-pressed')!=='true';
-  button.setAttribute('aria-pressed',String(enabled));
-  apply(enabled);
- });
+const effectIds = [
+    'toggle-aurora',
+    'toggle-water',
+    'toggle-temperature',
+    'toggle-nox',
+    'toggle-rain'
+];
+
+const effectHandlers = {};
+
+let activeEffectId = null;
+let sonificationAllowed = false;
+let narrationActive = false;
+let activeNarration = null;
+
+let currentEarthLanguage =
+    document.documentElement.lang || 'es';
+const narrationTexts = {
+    es: {
+        'toggle-aurora':
+            'Este fenómeno luminoso ocurre cuando partículas cargadas procedentes del Sol interactúan con el campo magnético y la atmósfera terrestre. Los gases atmosféricos emiten diferentes colores, creando cortinas luminosas en el cielo polar.',
+
+        'toggle-water':
+            'Los océanos cubren la mayor parte de nuestro planeta y desempeñan un papel fundamental en la regulación del clima. Sus corrientes transportan calor y nutrientes, mientras que el movimiento del agua genera olas.',
+
+        'toggle-temperature':
+            'La temperatura de la superficie terrestre cambia según la latitud, la radiación solar, la altitud y las condiciones atmosféricas. Los tonos azules representan zonas más frías, mientras que los amarillos y naranjas representan zonas más cálidas.',
+
+        'toggle-nox':
+            'Estos gases pueden producirse durante procesos de combustión, especialmente en vehículos, industrias y centrales eléctricas. Su presencia contribuye a la contaminación atmosférica y a la formación de ozono a nivel del suelo. Las zonas verdes representan una visualización ilustrativa, no mediciones reales.',
+
+        'toggle-rain':
+            'La lluvia y la nieve forman parte del ciclo del agua. La evaporación, la condensación y el movimiento de las masas de aire permiten que el agua regrese a la superficie terrestre. Esta simulación representa patrones de precipitación de manera ilustrativa.'
+    },
+
+    en: {
+        'toggle-aurora':
+            'This luminous phenomenon occurs when charged particles from the Sun interact with Earth’s magnetic field and atmosphere. Atmospheric gases emit different colors, creating luminous curtains across polar skies.',
+
+        'toggle-water':
+            'Oceans cover most of our planet and play an essential role in regulating climate. Their currents transport heat and nutrients, while water movement generates waves.',
+
+        'toggle-temperature':
+            'Earth’s surface temperature changes according to latitude, solar radiation, altitude and atmospheric conditions. Blue tones represent colder areas, while yellow and orange tones represent warmer areas.',
+
+        'toggle-nox':
+            'These gases can be produced by combustion processes, especially from vehicles, industries and power plants. Their presence contributes to air pollution and the formation of ground-level ozone. Green areas are an illustrative visualization, not real measurements.',
+
+        'toggle-rain':
+            'Rain and snow are part of the water cycle. Evaporation, condensation and the movement of air masses allow water to return to Earth’s surface. This simulation illustrates precipitation patterns.'
+    }
+};
+
+/* Detener una narración anterior */
+function stopNarration() {
+
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+    }
+
+    narrationActive = false;
+    activeNarration = null;
+
+    const box = document.getElementById('narration-box');
+
+    if (box) {
+        box.classList.remove('visible');
+        box.textContent = '';
+    }
+}
+/* Silenciar todos los sonidos originales */
+
+function silenceOriginalSound() {
+
+    if (!audio || audio.state !== 'running') return;
+
+    const now = audio.currentTime;
+
+    if (voices) {
+        voices.forEach(voice => {
+            voice.gain.setTargetAtTime(0, now, .06);
+        });
+    }
+
+    if (waves) {
+        waves.gain.setTargetAtTime(0, now, .06);
+    }
+
+    if (noxGain) {
+        noxGain.gain.setTargetAtTime(0, now, .06);
+    }
+
+    if (noxDissonance) {
+        noxDissonance.gain.setTargetAtTime(0, now, .06);
+    }
+
+    if (rainGain) {
+        rainGain.gain.setTargetAtTime(0, now, .06);
+    }
+
+    if (thermalVoices) {
+        thermalVoices.forEach(voice => {
+            voice.volume.setTargetAtTime(0, now, .06);
+        });
+    }
 }
 
-bindEffect('toggle-aurora',enabled=>{
- aurora.visible=enabled;
+/* Apagar todos los efectos visuales */
+
+function turnOffAllEffects() {
+
+    effectIds.forEach(id => {
+
+        const button = document.getElementById(id);
+
+        button.setAttribute('aria-pressed', 'false');
+        button.classList.remove('active');
+
+        if (effectHandlers[id]) {
+            effectHandlers[id](false);
+        }
+    });
+
+    activeEffectId = null;
+}
+
+/* Seleccionar una voz de narración */
+
+function chooseNarrationVoice(language) {
+
+    if (!('speechSynthesis' in window)) return null;
+
+    const voicesAvailable =
+        window.speechSynthesis.getVoices();
+
+    if (!voicesAvailable.length) return null;
+
+    const preferred = language === 'en'
+        ? ['Google US English', 'Microsoft Aria', 'Samantha', 'English']
+        : ['Google español', 'Microsoft Sabina', 'Monica', 'Spanish'];
+
+    for (const preference of preferred) {
+
+        const match = voicesAvailable.find(voice =>
+            voice.name.toLowerCase().includes(
+                preference.toLowerCase()
+            )
+        );
+
+        if (match) return match;
+    }
+
+    return voicesAvailable.find(voice =>
+        voice.lang.toLowerCase().startsWith(language)
+    ) || voicesAvailable[0];
+}
+
+/* Reproducir la explicación hablada */
+function playNarration(effectId) {
+
+    stopNarration();
+    silenceOriginalSound();
+
+    sonificationAllowed = false;
+
+    const text =
+        narrationTexts[currentEarthLanguage]?.[effectId];
+
+    const box = document.getElementById('narration-box');
+
+    if (!text || !('speechSynthesis' in window)) {
+
+        if (box) {
+            box.classList.remove('visible');
+        }
+
+        sonificationAllowed = true;
+        return;
+    }
+
+    // Mostrar la explicación en pantalla
+    if (box) {
+        box.textContent = text;
+        box.classList.add('visible');
+    }
+
+    const utterance = new SpeechSynthesisUtterance(text);
+
+    utterance.lang =
+        currentEarthLanguage === 'en' ? 'en-US' : 'es-MX';
+
+    utterance.rate = 0.92;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+
+    const voice = chooseNarrationVoice(currentEarthLanguage);
+
+    if (voice) {
+        utterance.voice = voice;
+    }
+
+    narrationActive = true;
+    activeNarration = utterance;
+
+    utterance.onend = () => {
+
+        if (activeNarration !== utterance) return;
+
+        narrationActive = false;
+        activeNarration = null;
+
+        if (box) {
+            box.classList.remove('visible');
+        }
+
+        if (activeEffectId === effectId) {
+            sonificationAllowed = true;
+        }
+    };
+
+    utterance.onerror = () => {
+
+        if (activeNarration !== utterance) return;
+
+        narrationActive = false;
+        activeNarration = null;
+
+        if (box) {
+            box.classList.remove('visible');
+        }
+
+        if (activeEffectId === effectId) {
+            sonificationAllowed = true;
+        }
+    };
+
+    window.speechSynthesis.speak(utterance);
+}
+/* Registrar cada efecto */
+
+function bindEffect(id, apply) {
+
+    const button = document.getElementById(id);
+
+    effectHandlers[id] = apply;
+
+    apply(false);
+
+    button.addEventListener('click', async () => {
+
+        const wasActive =
+            activeEffectId === id;
+
+        /* Detener narración y sonido anterior */
+
+        stopNarration();
+
+        sonificationAllowed = false;
+
+        silenceOriginalSound();
+
+        /* Apagar todos los efectos */
+
+        turnOffAllEffects();
+
+        /* Si se pulsó el efecto activo, solo se apaga */
+
+        if (wasActive) {
+            return;
+        }
+
+        /* Activar únicamente el seleccionado */
+
+        activeEffectId = id;
+
+        button.setAttribute('aria-pressed', 'true');
+        button.classList.add('active');
+
+        apply(true);
+
+        try {
+
+            await startSound();
+
+            if (activeEffectId !== id) return;
+
+            /* Primero narración, después sonificación */
+
+            playNarration(id);
+
+        } catch (error) {
+
+            console.error('No se pudo iniciar el audio:', error);
+
+            sonificationAllowed = true;
+        }
+    });
+}
+
+/* Registrar efectos visuales */
+
+bindEffect('toggle-aurora', enabled => {
+    aurora.visible = enabled;
 });
 
-bindEffect('toggle-nox',enabled=>{
- uniforms.uNox.value=Number(enabled);
+bindEffect('toggle-water', enabled => {
+    uniforms.uStrength.value = enabled ? 1.2 : 0;
 });
 
-bindEffect('toggle-temperature',enabled=>{
- uniforms.uTemperature.value=Number(enabled);
+bindEffect('toggle-temperature', enabled => {
+    uniforms.uTemperature.value = Number(enabled);
 });
 
-bindEffect('toggle-water',enabled=>{
- uniforms.uStrength.value=enabled?1.2:0;
+bindEffect('toggle-nox', enabled => {
+    uniforms.uNox.value = Number(enabled);
 });
+
+/* Permitir que el selector de idioma actualice las narraciones */
+
+window.setEarthNarrationLanguage = language => {
+    currentEarthLanguage = language;
+};
+
+/* Sincronizar idioma inicial */
+
+currentEarthLanguage =
+    document.documentElement.lang || 'es';
 
 /* =========================
    PRECIPITACIÓN
@@ -721,24 +1071,40 @@ const rainLayer=new THREE.Mesh(
 
 globe.add(rainLayer);
 
-const rainButton=document.getElementById('toggle-rain');
-const rainSpeedInput=document.getElementById('rain-speed');
-const rainSpeedValue=document.getElementById('rain-speed-value');
+const rainButton = document.getElementById('toggle-rain');
+const rainSpeedInput = document.getElementById('rain-speed');
+const rainSpeedValue = document.getElementById('rain-speed-value');
 
-let rainSpeed=1;
+let rainSpeed = 1;
 
-function updateRainControls(){
- const percent=Number(rainSpeedInput.value);
+/* Cambiar velocidad sin activar ni desactivar la lluvia */
 
- rainSpeed=percent/100;
- rainSpeedValue.textContent=percent+' %';
+function updateRainControls() {
 
- rainLayer.visible=rainButton.getAttribute('aria-pressed')==='true';
- rainCover.value=Number(rainLayer.visible);
+    const percent = Number(rainSpeedInput.value);
+
+    rainSpeed = percent / 100;
+
+    rainSpeedValue.textContent = percent + ' %';
 }
 
-bindEffect('toggle-rain',updateRainControls);
-rainSpeedInput.addEventListener('input',updateRainControls);
+/* Registrar precipitación como un efecto exclusivo */
+
+bindEffect('toggle-rain', enabled => {
+
+    rainLayer.visible = enabled;
+
+    rainCover.value = Number(enabled);
+});
+
+/* Actualizar velocidad */
+
+rainSpeedInput.addEventListener(
+    'input',
+    updateRainControls
+);
+
+updateRainControls();
 
 /* =========================
    ESTRELLAS
@@ -1413,7 +1779,11 @@ function updateNoxSound(full,base,now){
 
 function renderSound(){
 
- const active=audio?.state==='running';
+ const active =
+  audio?.state === 'running' &&
+  sonificationAllowed &&
+  !narrationActive &&
+  activeEffectId !== null;
 
  const effects=[
   {
@@ -1610,19 +1980,7 @@ function renderSound(){
 
 /* Activar audio al interactuar */
 
-for(const target of [
- canvas,
- waterButton,
- document.getElementById('toggle-aurora'),
- document.getElementById('toggle-temperature'),
- document.getElementById('toggle-rain'),
- document.getElementById('toggle-nox')
-]){
 
- target.addEventListener('click',()=>{
-  startSound().catch(console.error);
- });
-}
 
 /* =========================
    ANIMACIÓN PRINCIPAL
@@ -1875,7 +2233,9 @@ try {
 }
 
 changeLanguage(savedLanguage);
+/* Actualizar idioma de las narraciones */
 
+window.setEarthNarrationLanguage?.(savedLanguage);
 </script>
 </body>
 </html>
