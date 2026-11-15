@@ -24,57 +24,110 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#05060d;col
 .zoom button{width:44px;height:44px;border:1px solid #526381;border-radius:50%;background:rgba(20,27,48,.92);color:white;font-size:25px;cursor:pointer;backdrop-filter:blur(8px)}
 .hint{position:fixed;z-index:1;left:clamp(10px,2vw,26px);top:clamp(10px,2vw,26px);max-width:min(310px,calc(100vw - 330px));padding:9px 12px;border:1px solid rgba(120,150,190,.35);border-radius:10px;background:rgba(8,13,28,.68);color:#dbe8ff;font-size:12px;line-height:1.45;pointer-events:none}
 @media(max-width:600px){
- .effects{width:min(235px,calc(100vw - 20px));gap:6px}
- .effects button{padding:8px 9px;font-size:12px}
- .rain-speed{font-size:11px}
- .hint{top:auto;bottom:70px;max-width:calc(100vw - 20px);font-size:11px}
- .zoom{bottom:12px}
- .zoom button{width:40px;height:40px}
+  .effects{width:min(235px,calc(100vw - 20px));gap:6px}
+  .effects button{padding:8px 9px;font-size:12px}
+  .rain-speed{font-size:11px}
+  .hint{top:auto;bottom:70px;max-width:calc(100vw - 20px);font-size:11px}
+  .zoom{bottom:12px}
+  .zoom button{width:40px;height:40px}
 }
 
- .language-selector{
- position:fixed;
- z-index:10;
- left:clamp(10px,2vw,26px);
- top:clamp(65px,7vw,76px);
- display:flex;
- gap:5px;
- padding:5px;
- border:1px solid rgba(120,150,190,.4);
- border-radius:10px;
- background:rgba(8,13,28,.85);
- backdrop-filter:blur(8px);
+.language-selector{
+  position:fixed;
+  z-index:25;
+  left:clamp(10px,2vw,26px);
+  top:clamp(75px,7vw,86px);
+  display:flex;
+  gap:5px;
+  padding:5px;
+  border:1px solid rgba(120,150,190,.4);
+  border-radius:10px;
+  background:rgba(8,13,28,.85);
+  backdrop-filter:blur(8px);
 }
 
 .language-selector button{
- padding:7px 12px;
- border:1px solid transparent;
- border-radius:7px;
- background:transparent;
- color:#dbe8ff;
- font:inherit;
- font-size:12px;
- font-weight:700;
- cursor:pointer;
+  padding:7px 12px;
+  border:1px solid transparent;
+  border-radius:7px;
+  background:transparent;
+  color:#dbe8ff;
+  font:inherit;
+  font-size:12px;
+  font-weight:700;
+  cursor:pointer;
 }
 
 .language-selector button.active{
- background:rgba(45,105,125,.55);
- border-color:#79e7cf;
- color:#79e7cf;
+  background:rgba(45,105,125,.55);
+  border-color:#79e7cf;
+  color:#79e7cf;
 }
 
 .language-selector button:focus-visible{
- outline:2px solid white;
- outline-offset:3px;
+  outline:2px solid white;
+  outline-offset:3px;
 }
 
 @media(max-width:600px){
- .language-selector{
-  top:10px;
-  left:10px;
- }
-}/* CUADRO DE NARRACIÓN */
+  .language-selector{
+    top:10px;
+    left:10px;
+  }
+}
+
+.voice-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(5, 6, 13, 0.72);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.voice-loader.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.voice-loader-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 24px 32px;
+    border-radius: 16px;
+    border: 1px solid rgba(121, 231, 207, 0.5);
+    background: rgba(12, 20, 38, 0.94);
+    box-shadow: 0 0 35px rgba(70, 210, 190, 0.22);
+    text-align: center;
+    max-width: min(320px, calc(100vw - 32px));
+}
+
+.voice-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(121, 231, 207, 0.2);
+    border-top-color: #79e7cf;
+    border-radius: 50%;
+    animation: spinLoader 0.85s linear infinite;
+}
+
+.voice-loader-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: #eaf7ff;
+    letter-spacing: 0.2px;
+}
+
+@keyframes spinLoader {
+    to { transform: rotate(360deg); }
+}
 
 .narration-box {
     position: fixed;
@@ -127,6 +180,14 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#05060d;col
     <button type="button" id="btnES" class="active" aria-pressed="true">ES</button>
     <button type="button" id="btnEN" aria-pressed="false">EN</button>
 </div>
+
+<div id="voice-loader" class="voice-loader" role="status" aria-live="polite">
+    <div class="voice-loader-card">
+        <div class="voice-spinner" aria-hidden="true"></div>
+        <span id="voice-loader-text" class="voice-loader-text">Cargando narración de voz...</span>
+    </div>
+</div>
+
 <div id="scene" aria-label="Planeta Tierra en tres dimensiones. Arrastra para girar y usa la rueda o los controles para acercar."></div>
 
 <div class="hint">Explora la Tierra: arrastra para girar, usa la rueda del mouse o los botones + y − para acercar. Activa un efecto para escuchar su sonificación.</div>
@@ -483,19 +544,9 @@ gl_FragColor=vec4(clamp(color,0.,1.),1.);
 }`
 });
 
-/* Corrección de máscara de tierra para el efecto de temperatura. */
-material.fragmentShader=material.fragmentShader.replace(
- 'float landMask=max(1.-smoothstep(.06,.34,seaMask),inland);float cloudOpacity=landMask*mix(.67,1.,min(1.,region+.25*max(america,africa)));',
- 'float landMask=max(1.-smoothstep(.06,.34,seaMask),inland);float cloudOpacity=landMask*mix(.67,1.,min(1.,region+.25*max(america,africa)));'
-);
-
 material.needsUpdate=true;
 
 globe.add(new THREE.Mesh(new THREE.SphereGeometry(1,160,112),material));
-
-/* =========================
-   AURORAS BOREALES
-========================= */
 
 const auroraUniforms={
  time:{value:0},
@@ -572,15 +623,6 @@ aurora.frustumCulled=false;
 aurora.visible=false;
 globe.add(aurora);
 
-/* =========================
-   BOTONES DE EFECTOS
-========================= */
-
-
-/* =========================
-   EFECTOS Y NARRACIONES
-========================= */
-
 const effectIds = [
     'toggle-aurora',
     'toggle-water',
@@ -595,9 +637,16 @@ let activeEffectId = null;
 let sonificationAllowed = false;
 let narrationActive = false;
 let activeNarration = null;
+let loaderTimeout = null;
 
 let currentEarthLanguage =
     document.documentElement.lang || 'es';
+
+const loaderLabels = {
+    es: 'Cargando narración de voz...',
+    en: 'Loading voice narration...'
+};
+
 const narrationTexts = {
     es: {
         'toggle-aurora':
@@ -634,8 +683,44 @@ const narrationTexts = {
     }
 };
 
-/* Detener una narración anterior */
+if ('speechSynthesis' in window) {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+    };
+}
+
+function updateVoiceLoaderLanguage(language) {
+    const loaderText = document.getElementById('voice-loader-text');
+    if (loaderText) {
+        loaderText.textContent = loaderLabels[language] || loaderLabels.es;
+    }
+}
+
+function showVoiceLoader() {
+    clearTimeout(loaderTimeout);
+    updateVoiceLoaderLanguage(currentEarthLanguage);
+
+    const loaderEl = document.getElementById('voice-loader');
+    if (loaderEl) {
+        loaderEl.classList.add('visible');
+    }
+
+    loaderTimeout = setTimeout(() => {
+        hideVoiceLoader();
+    }, 4000);
+}
+
+function hideVoiceLoader() {
+    clearTimeout(loaderTimeout);
+    const loaderEl = document.getElementById('voice-loader');
+    if (loaderEl) {
+        loaderEl.classList.remove('visible');
+    }
+}
+
 function stopNarration() {
+    hideVoiceLoader();
 
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
@@ -651,10 +736,8 @@ function stopNarration() {
         box.textContent = '';
     }
 }
-/* Silenciar todos los sonidos originales */
 
 function silenceOriginalSound() {
-
     if (!audio || audio.state !== 'running') return;
 
     const now = audio.currentTime;
@@ -688,16 +771,14 @@ function silenceOriginalSound() {
     }
 }
 
-/* Apagar todos los efectos visuales */
-
 function turnOffAllEffects() {
-
     effectIds.forEach(id => {
-
         const button = document.getElementById(id);
 
-        button.setAttribute('aria-pressed', 'false');
-        button.classList.remove('active');
+        if (button) {
+            button.setAttribute('aria-pressed', 'false');
+            button.classList.remove('active');
+        }
 
         if (effectHandlers[id]) {
             effectHandlers[id](false);
@@ -707,10 +788,7 @@ function turnOffAllEffects() {
     activeEffectId = null;
 }
 
-/* Seleccionar una voz de narración */
-
 function chooseNarrationVoice(language) {
-
     if (!('speechSynthesis' in window)) return null;
 
     const voicesAvailable =
@@ -723,7 +801,6 @@ function chooseNarrationVoice(language) {
         : ['Google español', 'Microsoft Sabina', 'Monica', 'Spanish'];
 
     for (const preference of preferred) {
-
         const match = voicesAvailable.find(voice =>
             voice.name.toLowerCase().includes(
                 preference.toLowerCase()
@@ -738,9 +815,7 @@ function chooseNarrationVoice(language) {
     ) || voicesAvailable[0];
 }
 
-/* Reproducir la explicación hablada */
 function playNarration(effectId) {
-
     stopNarration();
     silenceOriginalSound();
 
@@ -752,20 +827,12 @@ function playNarration(effectId) {
     const box = document.getElementById('narration-box');
 
     if (!text || !('speechSynthesis' in window)) {
-
-        if (box) {
-            box.classList.remove('visible');
-        }
-
+        if (box) box.classList.remove('visible');
         sonificationAllowed = true;
         return;
     }
 
-    // Mostrar la explicación en pantalla
-    if (box) {
-        box.textContent = text;
-        box.classList.add('visible');
-    }
+    showVoiceLoader();
 
     const utterance = new SpeechSynthesisUtterance(text);
 
@@ -785,16 +852,24 @@ function playNarration(effectId) {
     narrationActive = true;
     activeNarration = utterance;
 
-    utterance.onend = () => {
+    utterance.onstart = () => {
+        if (activeNarration !== utterance) return;
+        hideVoiceLoader();
 
+        if (box) {
+            box.textContent = text;
+            box.classList.add('visible');
+        }
+    };
+
+    utterance.onend = () => {
         if (activeNarration !== utterance) return;
 
+        hideVoiceLoader();
         narrationActive = false;
         activeNarration = null;
 
-        if (box) {
-            box.classList.remove('visible');
-        }
+        if (box) box.classList.remove('visible');
 
         if (activeEffectId === effectId) {
             sonificationAllowed = true;
@@ -802,15 +877,13 @@ function playNarration(effectId) {
     };
 
     utterance.onerror = () => {
-
         if (activeNarration !== utterance) return;
 
+        hideVoiceLoader();
         narrationActive = false;
         activeNarration = null;
 
-        if (box) {
-            box.classList.remove('visible');
-        }
+        if (box) box.classList.remove('visible');
 
         if (activeEffectId === effectId) {
             sonificationAllowed = true;
@@ -819,68 +892,36 @@ function playNarration(effectId) {
 
     window.speechSynthesis.speak(utterance);
 }
-/* Registrar cada efecto */
 
-function bindEffect(id, apply) {
-
+function bindEffect(id, handler) {
+    effectHandlers[id] = handler;
     const button = document.getElementById(id);
-
-    effectHandlers[id] = apply;
-
-    apply(false);
+    if (!button) return;
 
     button.addEventListener('click', async () => {
-
-        const wasActive =
-            activeEffectId === id;
-
-        /* Detener narración y sonido anterior */
-
-        stopNarration();
-
-        sonificationAllowed = false;
-
-        silenceOriginalSound();
-
-        /* Apagar todos los efectos */
+        const wasActive = activeEffectId === id;
 
         turnOffAllEffects();
+        stopNarration();
+        silenceOriginalSound();
+        sonificationAllowed = false;
 
-        /* Si se pulsó el efecto activo, solo se apaga */
+        if (!wasActive) {
+            activeEffectId = id;
+            button.setAttribute('aria-pressed', 'true');
+            button.classList.add('active');
+            handler(true);
 
-        if (wasActive) {
-            return;
-        }
-
-        /* Activar únicamente el seleccionado */
-
-        activeEffectId = id;
-
-        button.setAttribute('aria-pressed', 'true');
-        button.classList.add('active');
-
-        apply(true);
-
-        try {
-
-            await startSound();
-
-            if (activeEffectId !== id) return;
-
-            /* Primero narración, después sonificación */
+            try {
+                await startSound();
+            } catch (err) {
+                console.warn('AudioContext bloqueado:', err);
+            }
 
             playNarration(id);
-
-        } catch (error) {
-
-            console.error('No se pudo iniciar el audio:', error);
-
-            sonificationAllowed = true;
         }
     });
 }
-
-/* Registrar efectos visuales */
 
 bindEffect('toggle-aurora', enabled => {
     aurora.visible = enabled;
@@ -898,20 +939,25 @@ bindEffect('toggle-nox', enabled => {
     uniforms.uNox.value = Number(enabled);
 });
 
-/* Permitir que el selector de idioma actualice las narraciones */
-
 window.setEarthNarrationLanguage = language => {
     currentEarthLanguage = language;
+    updateVoiceLoaderLanguage(language);
+
+    if (activeEffectId !== null) {
+        playNarration(activeEffectId);
+    } else {
+        stopNarration();
+        sonificationAllowed = false;
+
+        const box = document.getElementById('narration-box');
+        if (box) {
+            box.classList.remove('visible');
+        }
+    }
 };
 
-/* Sincronizar idioma inicial */
-
-currentEarthLanguage =
-    document.documentElement.lang || 'es';
-
-/* =========================
-   PRECIPITACIÓN
-========================= */
+currentEarthLanguage = document.documentElement.lang || 'es';
+updateVoiceLoaderLanguage(currentEarthLanguage);
 
 const rainTime={value:0};
 const rainCover={value:0};
@@ -1069,46 +1115,27 @@ const rainLayer=new THREE.Mesh(
  })
 );
 
+rainLayer.visible=false;
 globe.add(rainLayer);
 
-const rainButton = document.getElementById('toggle-rain');
 const rainSpeedInput = document.getElementById('rain-speed');
 const rainSpeedValue = document.getElementById('rain-speed-value');
 
 let rainSpeed = 1;
 
-/* Cambiar velocidad sin activar ni desactivar la lluvia */
-
 function updateRainControls() {
-
     const percent = Number(rainSpeedInput.value);
-
     rainSpeed = percent / 100;
-
     rainSpeedValue.textContent = percent + ' %';
 }
 
-/* Registrar precipitación como un efecto exclusivo */
-
 bindEffect('toggle-rain', enabled => {
-
     rainLayer.visible = enabled;
-
     rainCover.value = Number(enabled);
 });
 
-/* Actualizar velocidad */
-
-rainSpeedInput.addEventListener(
-    'input',
-    updateRainControls
-);
-
+rainSpeedInput.addEventListener('input', updateRainControls);
 updateRainControls();
-
-/* =========================
-   ESTRELLAS
-========================= */
 
 const positions=[];
 const starColors=[];
@@ -1151,10 +1178,6 @@ scene.add(new THREE.Points(
   toneMapped:false
  })
 ));
-
-/* =========================
-   ROTACIÓN Y ZOOM
-========================= */
 
 let angle=-1.5;
 let tilt=.58;
@@ -1203,7 +1226,6 @@ canvas.addEventListener('pointermove',e=>{
  });
 
  if(pointers.size>=2){
-
   const pts=[...pointers.values()];
 
   const pinch=Math.hypot(
@@ -1221,7 +1243,6 @@ canvas.addEventListener('pointermove',e=>{
   previousPinch=pinch;
 
  }else if(dragPointer===e.pointerId){
-
   angle+=(e.clientX-px)*.007;
 
   tilt=Math.max(
@@ -1273,10 +1294,6 @@ document.getElementById('zoom-out').addEventListener('click',()=>{
  distance=Math.min(9,distance+.35);
 });
 
-/* =========================
-   REDIMENSIONAR
-========================= */
-
 function resize(){
  const w=mount.clientWidth;
  const h=mount.clientHeight;
@@ -1289,12 +1306,6 @@ function resize(){
 
 window.addEventListener('resize',resize);
 resize();
-
-/* =========================
-   SONIFICACIÓN DINÁMICA
-========================= */
-
-const waterButton=document.getElementById('toggle-water');
 
 const notes=[130.81,196,261.63];
 
@@ -1327,8 +1338,6 @@ async function startSound(){
 
   audio=new AudioContext();
 
-  /* Voces de aurora */
-
   voices=notes.map((frequency,i)=>{
 
    const tone=audio.createOscillator();
@@ -1347,8 +1356,6 @@ async function startSound(){
     hue:[140,189,320][i]
    };
   });
-
-  /* Ruido de las olas */
 
   const buffer=audio.createBuffer(
    1,
@@ -1382,8 +1389,6 @@ async function startSound(){
 
   noise.start();
 
-  /* Sonido de NOx */
-
   noxGain=audio.createGain();
   noxGain.gain.value=0;
 
@@ -1407,8 +1412,6 @@ async function startSound(){
    tone.start();
   }
 
-  /* Sonido de precipitación */
-
   const rainNoise=audio.createBufferSource();
 
   rainNoise.buffer=buffer;
@@ -1429,8 +1432,6 @@ async function startSound(){
    .connect(audio.destination);
 
   rainNoise.start(0,1.7);
-
-  /* Voces de temperatura */
 
   thermalVoices=[77.78,98.00,116.54].map(frequency=>{
 
@@ -1457,21 +1458,14 @@ async function startSound(){
  await audio.resume();
 }
 
-/* Captura los colores del planeta */
-
 function framePixels(){
-
  pixels.drawImage(canvas,0,0,64,64);
-
  return pixels.getImageData(0,0,64,64).data;
 }
-
-/* Compara los colores y movimiento */
 
 function measure(effect,full,base,greenOnly=false){
 
  const old=previous[effect];
-
  const levels=new Float32Array(full.length/4);
 
  let energy=0;
@@ -1500,7 +1494,6 @@ function measure(effect,full,base,greenOnly=false){
    :change;
 
   levels[j]=level;
-
   energy+=level;
 
   if(old){
@@ -1524,8 +1517,6 @@ function measure(effect,full,base,greenOnly=false){
   )
  };
 }
-
-/* Sonido de las olas */
 
 function setNoise(effect,full,base,gain,tone,stereo,now){
 
@@ -1557,8 +1548,6 @@ function setNoise(effect,full,base,gain,tone,stereo,now){
   .18
  );
 }
-
-/* Interpretación de colores de temperatura */
 
 function thermalWeights(full,base,i){
 
@@ -1648,8 +1637,6 @@ function updateTemperature(full,base,now){
   );
  });
 }
-
-/* Interpretación de precipitación */
 
 function rainPixel(full,base,i){
 
@@ -1743,8 +1730,6 @@ function updateRainSound(full,base,now){
  );
 }
 
-/* Sonido de contaminación NOx */
-
 function updateNoxSound(full,base,now){
 
  const {
@@ -1774,8 +1759,6 @@ function updateNoxSound(full,base,now){
   .23
  );
 }
-
-/* Renderizado y análisis de efectos */
 
 function renderSound(){
 
@@ -1836,12 +1819,9 @@ function renderSound(){
    effect.object[effect.key]=effect.off;
 
    try{
-
     renderer.render(scene,camera);
     sampled[effect.name]=framePixels();
-
    }finally{
-
     effect.object[effect.key]=value;
    }
   }
@@ -1978,14 +1958,6 @@ function renderSound(){
  });
 }
 
-/* Activar audio al interactuar */
-
-
-
-/* =========================
-   ANIMACIÓN PRINCIPAL
-========================= */
-
 const clock=new THREE.Clock();
 
 function animate(){
@@ -2035,11 +2007,7 @@ animate();
  '<small>'+String(e.message||e)+'</small></div>';
 }
 </script>
- <script>
-/* =========================================
-   SISTEMA DE IDIOMAS ESPAÑOL / INGLÉS
-========================================= */
-
+<script>
 const translations = {
 
     es: {
@@ -2047,8 +2015,9 @@ const translations = {
 
         languageSelector: "Selector de idioma",
         planetDescription: "Planeta Tierra en tres dimensiones. Arrastra para girar y usa la rueda o los controles para acercar.",
+        hint: "Explora la Tierra: arrastra para girar, usa la rueda del mouse o los botones + y − para acercar. Activa un efecto para escuchar su sonificación.",
+        voiceLoader: "Cargando narración de voz...",
 
-       
         effects: "Efectos del planeta",
 
         aurora: "Aurora boreal",
@@ -2079,8 +2048,9 @@ const translations = {
 
         languageSelector: "Language selector",
         planetDescription: "Three-dimensional planet Earth. Drag to rotate and use the mouse wheel or controls to zoom.",
+        hint: "Explore Earth: drag to rotate, use the mouse wheel or the + and − buttons to zoom. Activate an effect to hear its sonification.",
+        voiceLoader: "Loading voice narration...",
 
-       
         effects: "Planet effects",
 
         aurora: "Northern lights",
@@ -2108,8 +2078,6 @@ const translations = {
 
 };
 
-/* Referencias a elementos */
-
 const languageES = document.getElementById("btnES");
 const languageEN = document.getElementById("btnEN");
 
@@ -2119,12 +2087,17 @@ function changeLanguage(language) {
 
     if (!t) return;
 
-    /* Idioma general */
-
     document.documentElement.lang = language;
     document.title = t.pageTitle;
 
-    /* Selector */
+    const voiceLoaderText = document.getElementById("voice-loader-text");
+    if (voiceLoaderText) {
+        voiceLoaderText.textContent = t.voiceLoader;
+    }
+
+    if (window.setEarthNarrationLanguage) {
+        window.setEarthNarrationLanguage(language);
+    }
 
     document.querySelector(".language-selector")
         .setAttribute("aria-label", t.languageSelector);
@@ -2135,21 +2108,13 @@ function changeLanguage(language) {
     languageES.setAttribute("aria-pressed", String(language === "es"));
     languageEN.setAttribute("aria-pressed", String(language === "en"));
 
-    /* Descripción de la Tierra */
-
     document.getElementById("scene")
         .setAttribute("aria-label", t.planetDescription);
 
-    /* Instrucciones */
-
     document.querySelector(".hint").textContent = t.hint;
-
-    /* Grupo de efectos */
 
     document.querySelector(".effects")
         .setAttribute("aria-label", t.effects);
-
-    /* Botones */
 
     const effectButtons = [
         ["toggle-aurora", t.aurora, t.auroraDescription],
@@ -2160,36 +2125,18 @@ function changeLanguage(language) {
     ];
 
     effectButtons.forEach(([id, text, description]) => {
-
         const button = document.getElementById(id);
-
-        /* Cambiamos el texto sin eliminar la flecha */
-
         button.firstChild.textContent = text + " ";
-
         button.title = description;
         button.setAttribute("aria-label", description);
-
     });
 
-    /* Títulos específicos */
-
-    document.getElementById("toggle-temperature").title =
-        t.temperatureTitle;
-
-    document.getElementById("toggle-nox").title =
-        t.noxTitle;
-
-    document.getElementById("toggle-rain").title =
-        t.rainTitle;
-
-    /* Velocidad de precipitación */
+    document.getElementById("toggle-temperature").title = t.temperatureTitle;
+    document.getElementById("toggle-nox").title = t.noxTitle;
+    document.getElementById("toggle-rain").title = t.rainTitle;
 
     const rainLabel = document.querySelector(".rain-speed");
-
     rainLabel.querySelector("span").textContent = t.rainSpeed;
-
-    /* Controles de zoom */
 
     document.querySelector(".zoom")
         .setAttribute("aria-label", t.zoomControls);
@@ -2200,17 +2147,12 @@ function changeLanguage(language) {
     document.getElementById("zoom-out")
         .setAttribute("aria-label", t.zoomOut);
 
-  
-
     try {
         localStorage.setItem("idiomaTierra3D", language);
     } catch (error) {
         console.warn("No se pudo guardar el idioma.");
     }
-
 }
-
-/* Eventos del selector */
 
 languageES.addEventListener("click", () => {
     changeLanguage("es");
@@ -2219,8 +2161,6 @@ languageES.addEventListener("click", () => {
 languageEN.addEventListener("click", () => {
     changeLanguage("en");
 });
-
-/* Recuperar idioma guardado */
 
 let savedLanguage = "es";
 
@@ -2231,8 +2171,6 @@ try {
 }
 
 changeLanguage(savedLanguage);
-/* Actualizar idioma de las narraciones */
-
 window.setEarthNarrationLanguage?.(savedLanguage);
 </script>
 </body>
