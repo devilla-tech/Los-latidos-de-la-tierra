@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,333 +5,82 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#05060d">
 <title>Los latidos de la Tierra | Experiencia 3D</title>
-
 <style>
 *{box-sizing:border-box}
-
-html,body{
- margin:0;
- width:100%;
- height:100%;
- overflow:hidden;
- background:#05060d;
- color:#f4f0ff;
- color-scheme:dark;
- font-family:system-ui,sans-serif;
-}
-
-#scene{
- position:fixed;
- inset:0;
- width:100%;
- height:100%;
- touch-action:none;
- cursor:grab;
-}
-
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#05060d;color:#f4f0ff;color-scheme:dark;font-family:system-ui,sans-serif}
+#scene{position:fixed;inset:0;touch-action:none;cursor:grab}
 #scene:active{cursor:grabbing}
 #scene canvas{display:block;width:100%;height:100%}
-
-.effects{
- position:fixed;
- z-index:3;
- right:clamp(10px,2vw,26px);
- top:clamp(10px,2vw,26px);
- display:grid;
- gap:8px;
- width:min(270px,calc(100vw - 20px));
- max-height:calc(100dvh - 20px);
- overflow:auto;
- font:14px system-ui;
-}
-
-.effects button{
- display:flex;
- justify-content:space-between;
- align-items:center;
- gap:10px;
- padding:10px 12px;
- color:#f4f0ff;
- background:rgba(20,27,48,.94);
- border:1px solid #526381;
- border-radius:9px;
- cursor:pointer;
- text-align:left;
- font:inherit;
- backdrop-filter:blur(8px);
-}
-
-.effects button[aria-pressed="true"]{
- border-color:#79e7cf;
- background:rgba(20,45,57,.96);
-}
-
-.effects button:focus-visible,
-.zoom button:focus-visible{
- outline:2px solid white;
- outline-offset:3px;
-}
-
-.effect-arrow{
- color:#aab5ce;
- transition:transform .2s;
-}
-
-.effects button[aria-pressed="true"] .effect-arrow{
- transform:rotate(90deg);
- color:#79e7cf;
-}
-
-.rain-speed{
- display:grid;
- grid-template-columns:1fr auto;
- gap:5px 8px;
- align-items:center;
- padding:9px 10px;
- color:#f4f0ff;
- background:rgba(20,27,48,.94);
- border:1px solid #526381;
- border-radius:9px;
- font-size:12px;
- backdrop-filter:blur(8px);
-}
-
-.rain-speed input{
- grid-column:1/-1;
- width:100%;
- margin:0;
- accent-color:#79e7cf;
- cursor:pointer;
-}
-
+.effects{position:fixed;z-index:2;right:clamp(10px,2vw,26px);top:clamp(10px,2vw,26px);display:grid;gap:8px;width:min(290px,calc(100vw - 20px));max-height:calc(100dvh - 20px);overflow:auto;padding:2px}
+.effects button{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;color:#f4f0ff;background:rgba(20,27,48,.94);border:1px solid #526381;border-radius:9px;cursor:pointer;text-align:left;font:inherit;backdrop-filter:blur(8px)}
+.effects button[aria-pressed="true"]{border-color:#79e7cf;background:rgba(20,45,57,.96)}
+.effects button:focus-visible,.zoom button:focus-visible{outline:2px solid white;outline-offset:3px}
+.effect-arrow{color:#aab5ce;transition:transform .2s}
+.effects button[aria-pressed="true"] .effect-arrow{transform:rotate(90deg);color:#79e7cf}
+.rain-speed{display:grid;grid-template-columns:1fr auto;gap:5px 8px;align-items:center;padding:9px 10px;color:#f4f0ff;background:rgba(20,27,48,.94);border:1px solid #526381;border-radius:9px;font-size:12px;backdrop-filter:blur(8px)}
+.rain-speed input{grid-column:1/-1;width:100%;margin:0;accent-color:#79e7cf;cursor:pointer}
 .rain-speed output{font-variant-numeric:tabular-nums}
-
-.zoom{
- position:fixed;
- z-index:3;
- left:clamp(10px,2vw,26px);
- bottom:clamp(12px,2vw,24px);
- display:flex;
- gap:8px;
-}
-
-.zoom button{
- width:46px;
- height:46px;
- border:1px solid #526381;
- border-radius:50%;
- background:rgba(20,27,48,.94);
- color:white;
- font-size:25px;
- cursor:pointer;
- backdrop-filter:blur(8px);
-}
-
-.hint{
- position:fixed;
- z-index:2;
- left:clamp(10px,2vw,26px);
- top:clamp(10px,2vw,26px);
- max-width:min(310px,calc(100vw - 310px));
- padding:10px 13px;
- border:1px solid rgba(120,150,190,.35);
- border-radius:10px;
- background:rgba(8,13,28,.75);
- color:#dbe8ff;
- font-size:12px;
- line-height:1.5;
- pointer-events:none;
-}
-
-.audio-status{
- position:fixed;
- z-index:2;
- left:clamp(10px,2vw,26px);
- bottom:76px;
- padding:8px 12px;
- border:1px solid rgba(121,231,207,.35);
- border-radius:9px;
- background:rgba(8,13,28,.78);
- color:#79e7cf;
- font-size:11px;
- pointer-events:none;
-}
-
-.info-panel{
- position:fixed;
- z-index:4;
- left:clamp(10px,2vw,26px);
- bottom:135px;
- width:min(360px,calc(100vw - 20px));
- padding:16px;
- border:1px solid rgba(121,231,207,.5);
- border-radius:13px;
- background:rgba(8,15,32,.95);
- backdrop-filter:blur(12px);
- box-shadow:0 10px 35px rgba(0,0,0,.4);
-}
-
-.info-panel[hidden]{display:none}
-
-.info-panel h2{
- margin:0 30px 9px 0;
- color:#79e7cf;
- font-size:18px;
-}
-
-.info-panel p{
- margin:0;
- color:#e1e9fa;
- font-size:13px;
- line-height:1.6;
-}
-
-.info-close{
- position:absolute;
- top:9px;
- right:9px;
- width:28px;
- height:28px;
- border:1px solid #526381;
- border-radius:50%;
- background:#141b30;
- color:white;
- cursor:pointer;
- font-size:17px;
-}
-
+.zoom{position:fixed;z-index:2;left:clamp(10px,2vw,26px);bottom:clamp(12px,2vw,24px);display:flex;gap:8px}
+.zoom button{width:44px;height:44px;border:1px solid #526381;border-radius:50%;background:rgba(20,27,48,.92);color:white;font-size:25px;cursor:pointer;backdrop-filter:blur(8px)}
+.hint{position:fixed;z-index:1;left:clamp(10px,2vw,26px);top:clamp(10px,2vw,26px);max-width:min(310px,calc(100vw - 330px));padding:9px 12px;border:1px solid rgba(120,150,190,.35);border-radius:10px;background:rgba(8,13,28,.68);color:#dbe8ff;font-size:12px;line-height:1.45;pointer-events:none}
 @media(max-width:600px){
- .effects{
-  width:min(225px,calc(100vw - 20px));
-  gap:6px;
- }
- .effects button{
-  padding:8px 9px;
-  font-size:12px;
- }
+ .effects{width:min(235px,calc(100vw - 20px));gap:6px}
+ .effects button{padding:8px 9px;font-size:12px}
  .rain-speed{font-size:11px}
- .hint{
-  top:auto;
-  bottom:125px;
-  max-width:calc(100vw - 20px);
-  font-size:11px;
- }
- .audio-status{bottom:65px}
+ .hint{top:auto;bottom:70px;max-width:calc(100vw - 20px);font-size:11px}
  .zoom{bottom:12px}
  .zoom button{width:40px;height:40px}
- .info-panel{
-  bottom:110px;
-  width:min(330px,calc(100vw - 20px));
-  padding:13px;
- }
- .info-panel p{font-size:12px}
 }
 </style>
 </head>
-
 <body>
 
-<div id="scene" aria-label="Planeta Tierra en tres dimensiones"></div>
+<div id="scene" aria-label="Planeta Tierra en tres dimensiones. Arrastra para girar y usa la rueda o los controles para acercar."></div>
 
-<div class="hint">
- Explora la Tierra: arrastra para girar, usa la rueda del mouse o los botones + y − para acercar. Activa un efecto para escuchar sus colores.
-</div>
+<div class="hint">Explora la Tierra: arrastra para girar, usa la rueda del mouse o los botones + y − para acercar. Activa un efecto para escuchar su sonificación.</div>
 
 <div class="effects" role="group" aria-label="Efectos del planeta">
-
- <button type="button" id="toggle-aurora" aria-pressed="false">
-  Aurora boreal <span class="effect-arrow">▸</span>
- </button>
-
- <button type="button" id="toggle-water" aria-pressed="false">
-  Olas del mar <span class="effect-arrow">▸</span>
- </button>
-
- <button type="button" id="toggle-temperature" aria-pressed="false">
-  Temperatura continental <span class="effect-arrow">▸</span>
- </button>
-
- <button type="button" id="toggle-nox" aria-pressed="false">
-  Óxidos de nitrógeno (NOₓ) <span class="effect-arrow">▸</span>
- </button>
-
- <button type="button" id="toggle-rain" aria-pressed="false">
-  Precipitación <span class="effect-arrow">▸</span>
- </button>
-
- <label class="rain-speed" for="rain-speed">
-  <span>Rapidez de precipitación</span>
-  <output id="rain-speed-value">100 %</output>
-  <input type="range" id="rain-speed" min="0" max="200" step="1" value="100">
- </label>
-
+  <button type="button" id="toggle-aurora" aria-pressed="false">Aurora boreal <span class="effect-arrow" aria-hidden="true">▸</span></button>
+  <button type="button" id="toggle-water" aria-pressed="false">Olas del mar <span class="effect-arrow" aria-hidden="true">▸</span></button>
+  <button type="button" id="toggle-temperature" aria-pressed="false" title="Temperatura simulada">Temperatura continental <span class="effect-arrow" aria-hidden="true">▸</span></button>
+  <button type="button" id="toggle-nox" aria-pressed="false" title="Focos ilustrativos de contaminación por óxidos de nitrógeno">Óxidos de nitrógeno (NOₓ) <span class="effect-arrow" aria-hidden="true">▸</span></button>
+  <button type="button" id="toggle-rain" aria-pressed="false" title="Lluvia y nieve simuladas">Precipitación <span class="effect-arrow" aria-hidden="true">▸</span></button>
+  <label class="rain-speed" for="rain-speed">
+    <span>Rapidez de precipitación</span><output id="rain-speed-value" for="rain-speed">100 %</output>
+    <input type="range" id="rain-speed" min="0" max="200" step="1" value="100">
+  </label>
 </div>
 
-<div class="audio-status" id="audio-status">
- Audio: activa un efecto para comenzar
-</div>
-
-<div class="info-panel" id="info-panel" hidden>
- <button class="info-close" id="info-close" type="button">×</button>
- <h2 id="info-title"></h2>
- <p id="info-description"></p>
-</div>
-
-<div class="zoom">
- <button type="button" id="zoom-in" aria-label="Acercar">+</button>
- <button type="button" id="zoom-out" aria-label="Alejar">−</button>
+<div class="zoom" role="group" aria-label="Controles de zoom">
+  <button type="button" id="zoom-in" aria-label="Acercar">+</button>
+  <button type="button" id="zoom-out" aria-label="Alejar">−</button>
 </div>
 
 <script type="module">
-
 const mount=document.querySelector('#scene');
 
 try{
-
-/* ======================================
-   THREE JS
-====================================== */
-
 const THREE=await import('https://esm.sh/three@0.160.1');
 
 const scene=new THREE.Scene();
-
-const camera=new THREE.PerspectiveCamera(
- 44,
- window.innerWidth/window.innerHeight,
- .1,
- 200
-);
-
-camera.position.z=3.6;
-
+const camera=new THREE.PerspectiveCamera(44,1,.1,200);
+camera.position.set(0,0,3.6);
+camera.lookAt(0,0,0);
 scene.background=new THREE.Color(0x05060d);
 
-const renderer=new THREE.WebGLRenderer({
- antialias:true,
- alpha:false,
- preserveDrawingBuffer:true
-});
-
-renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure=1.75;
-
 mount.appendChild(renderer.domElement);
 
 const globe=new THREE.Group();
+globe.position.set(0,0,0);
 scene.add(globe);
 
-/* ======================================
-   TEXTURA TERRESTRE
-====================================== */
-
 const loader=new THREE.TextureLoader();
-
-const load=url=>new Promise((resolve,reject)=>{
- loader.load(url,resolve,undefined,reject);
-});
+const load=url=>new Promise((resolve,reject)=>loader.load(url,resolve,undefined,reject));
 
 const urls=[
  'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
@@ -340,23 +88,12 @@ const urls=[
 ];
 
 let tex=null;
-
 for(const url of urls){
- try{
-  tex=await load(url);
-  break;
- }catch(e){}
+ try{tex=await load(url);break}catch(e){}
 }
 
-if(!tex){
- throw Error('No se pudo descargar la textura terrestre. Comprueba Internet.');
-}
-
+if(!tex)throw Error('No se pudo descargar la textura terrestre. Comprueba tu conexión a Internet.');
 tex.colorSpace=THREE.SRGBColorSpace;
-
-/* ======================================
-   MATERIAL DE LA TIERRA
-====================================== */
 
 const uniforms={
  uMap:{value:tex},
@@ -371,354 +108,302 @@ const uniforms={
 const material=new THREE.ShaderMaterial({
  uniforms,
 
- vertexShader:`
- varying vec2 vUv;
- varying vec3 vNormal;
- varying vec3 vPos;
-
+ vertexShader:`varying vec2 vUv;varying vec3 vNormal;varying vec3 vPos;
  void main(){
-  vUv=uv;
-  vNormal=normalize(normalMatrix*normal);
-  vec4 mv=modelViewMatrix*vec4(position,1.);
-  vPos=mv.xyz;
-  gl_Position=projectionMatrix*mv;
- }
- `,
+ vUv=uv;
+ vNormal=normalize(normalMatrix*normal);
+ vec4 mv=modelViewMatrix*vec4(position,1.);
+ vPos=mv.xyz;
+ gl_Position=projectionMatrix*mv;
+ }`,
 
- fragmentShader:`
-
- uniform sampler2D uMap;
+ fragmentShader:`uniform sampler2D uMap;
  uniform float uTime;
  uniform float uStrength;
  uniform float uTemperature;
  uniform float uThermalTime;
  uniform float uNox;
  uniform float uNoxTime;
-
  varying vec2 vUv;
  varying vec3 vNormal;
  varying vec3 vPos;
 
- float hash(vec2 p){
-  return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);
- }
+float hash(vec2 p){
+ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);
+}
 
- float noise(vec2 p){
-  vec2 i=floor(p), f=fract(p);
-  vec2 s=f*f*(3.-2.*f);
-
-  return mix(
-   mix(hash(i),hash(i+vec2(1.,0.)),s.x),
-   mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),s.x),
-   s.y
-  );
- }
-
- float textureCloud(vec2 p){
-  return .56*noise(p)+.29*noise(p*2.13)+.15*noise(p*4.31);
- }
-
- float regionalPatch(vec2 uv,vec2 center,vec2 size){
-  vec2 offset=uv-center;
-  offset.x=fract(offset.x+.5)-.5;
-  return 1.-smoothstep(.49,1.,length(offset/(size*1.22)));
- }
-
- float inlandPatch(vec2 point,vec2 center,vec2 extent){
-  return 1.-smoothstep(.70,1.,length((point-center)/extent));
- }
-
- float noxShoreLand(vec2 uv){
-  vec3 rgb=texture2D(uMap,vec2(fract(uv.x),clamp(uv.y,0.,1.))).rgb;
-  float excess=rgb.b-max(rgb.r,rgb.g);
-  float ratio=excess/max(.025,max(rgb.r,max(rgb.g,rgb.b)));
-  float sea=max(smoothstep(.003,.017,excess),smoothstep(.045,.15,ratio));
-  return 1.-smoothstep(0.,.06,sea);
- }
-
- float pollutionPlume(vec2 coords,vec2 center,vec2 extent){
-  vec2 p=(coords-center)/extent;
-  float core=exp(-3.7*dot(p,p));
-  vec2 tail=p-vec2(.33,.12);
-  float haze=exp(-1.55*dot(tail,tail));
-  return max(core,.60*haze);
- }
-
- void main(){
-
- vec3 base=texture2D(uMap,vUv).rgb;
-
- float ocean=smoothstep(.015,.115,base.b-max(base.r,base.g));
-
- vec2 p=vec2(vUv.x*18.,vUv.y*12.);
-
- float twist=
- sin(p.x*1.15+2.2*sin(p.y*1.9+uTime*.85))
- +cos(p.y*1.45-p.x*.6-uTime*.72);
-
- vec2 q=p+vec2(
-  sin(p.y*2.+twist*2.1+uTime*.95),
-  cos(p.x*1.3-twist*1.8-uTime*.84)
- )*1.35;
-
- float filaments=sin(q.x*7.+q.y*4.+3.8*sin(q.y*2.7+uTime)-uTime*4.);
- float crossWave=sin(q.x*13.-q.y*9.+3.*cos(q.x*2.4-uTime)-uTime*5.2);
- float broad=sin(q.y*2.9+q.x*1.8+2.5*twist-uTime*1.5);
-
- float crest=smoothstep(.22,.93,.53*filaments+.28*crossWave+.34*broad);
-
- float foam=crest*(.50+.50*smoothstep(-.15,.65,sin(q.x*19.+q.y*22.+uTime*3.)));
-
- vec3 n=normalize(vNormal);
- vec3 lightDir=normalize(vec3(-.5,.35,1.));
- float diffuse=max(dot(n,lightDir),0.);
- float latitude=abs(vUv.y-.5)*2.;
-
- float oceanHue=smoothstep(-.85,.90,broad*.55*clamp(uStrength,0.,1.)+(.65-latitude)*.7+base.g);
-
- vec3 water=mix(vec3(.13,.26,.85),vec3(.04,.83,.88),oceanHue);
-
- water=mix(water,vec3(.38,.28,.90),smoothstep(.45,.88,latitude)*.55);
-
- float current=pow(.5+.5*sin(2.1*q.x+3.6*q.y+1.8*twist-.7*uTime),5.);
-
- water=mix(water,vec3(.78,.97,1.),clamp((foam*.83+current*.19)*uStrength,0.,.93));
-
- float brightness=dot(base,vec3(.2126,.7152,.0722));
-
- float vegetation=smoothstep(-.17,.035,base.g-base.r)*
- smoothstep(-.025,.095,base.g-base.b);
-
- float desert=smoothstep(.035,.24,base.r-base.b)*smoothstep(.11,.55,brightness);
-
- vec3 land=mix(
-  clamp(vec3(brightness)+(base-brightness)*1.65,0.,1.),
-  vec3(.97,.62,.24),
-  desert*.74
+float noise(vec2 p){
+ vec2 i=floor(p), f=fract(p);
+ vec2 s=f*f*(3.-2.*f);
+ return mix(
+  mix(hash(i),hash(i+vec2(1.,0.)),s.x),
+  mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),s.x),
+  s.y
  );
+}
 
- land=mix(
-  land,
-  mix(vec3(.07,.49,.23),vec3(.46,.88,.23),smoothstep(.04,.45,brightness)),
-  vegetation*.84
- );
+float textureCloud(vec2 p){
+ return .56*noise(p)+.29*noise(p*2.13)+.15*noise(p*4.31);
+}
 
- float ice=smoothstep(.54,.87,brightness)*
- (1.-smoothstep(.04,.16,max(base.r,base.g)-base.b));
+float regionalPatch(vec2 uv,vec2 center,vec2 size){
+ vec2 offset=uv-center;
+ offset.x=fract(offset.x+.5)-.5;
+ return 1.-smoothstep(.49,1.,length(offset/(size*1.22)));
+}
 
- land=mix(land,vec3(.84,.95,1.),ice*.62);
+float inlandPatch(vec2 point,vec2 center,vec2 extent){
+ return 1.-smoothstep(.70,1.,length((point-center)/extent));
+}
 
- vec3 color=mix(land,water,ocean);
- color*=.59+.41*diffuse;
+float noxShoreLand(vec2 uv){
+ vec3 rgb=texture2D(uMap,vec2(fract(uv.x),clamp(uv.y,0.,1.))).rgb;
+ float excess=rgb.b-max(rgb.r,rgb.g);
+ float ratio=excess/max(.025,max(rgb.r,max(rgb.g,rgb.b)));
+ float sea=max(smoothstep(.003,.017,excess),smoothstep(.045,.15,ratio));
+ return 1.-smoothstep(0.,.06,sea);
+}
 
- float rim=pow(1.-max(dot(n,normalize(-vPos)),0.),3.);
+float pollutionPlume(vec2 coords,vec2 center,vec2 extent){
+ vec2 p=(coords-center)/extent;
+ float core=exp(-3.7*dot(p,p));
+ vec2 tail=p-vec2(.33,.12);
+ float haze=exp(-1.55*dot(tail,tail));
+ return max(core,.60*haze);
+}
 
- vec3 rimColor=mix(
-  vec3(.20,.93,1.),
-  vec3(.74,.42,1.),
-  smoothstep(-.8,.8,n.x)
- );
+void main(){
 
- color=mix(color,rimColor,rim*.7);
+vec3 base=texture2D(uMap,vUv).rgb;
 
- /* TEMPERATURA */
+float ocean=smoothstep(.015,.115,base.b-max(base.r,base.g));
 
- if(uTemperature>.5){
+vec2 p=vec2(vUv.x*18.,vUv.y*12.);
+float twist=sin(p.x*1.15+2.2*sin(p.y*1.9+uTime*.85))+cos(p.y*1.45-p.x*.6-uTime*.72);
+vec2 q=p+vec2(
+ sin(p.y*2.+twist*2.1+uTime*.95),
+ cos(p.x*1.3-twist*1.8-uTime*.84)
+)*1.35;
 
-  float blueExcess=base.b-max(base.r,base.g);
-  float blueRatio=blueExcess/max(.025,max(base.r,max(base.g,base.b)));
+float filaments=sin(q.x*7.+q.y*4.+3.8*sin(q.y*2.7+uTime)-uTime*4.);
+float crossWave=sin(q.x*13.-q.y*9.+3.*cos(q.x*2.4-uTime)-uTime*5.2);
+float broad=sin(q.y*2.9+q.x*1.8+2.5*twist-uTime*1.5);
+float crest=smoothstep(.22,.93,.53*filaments+.28*crossWave+.34*broad);
+float foam=crest*(.50+.50*smoothstep(-.15,.65,sin(q.x*19.+q.y*22.+uTime*3.)));
 
-  float seaMask=max(
-   ocean,
-   max(smoothstep(.003,.017,blueExcess),smoothstep(.045,.15,blueRatio))
+vec3 n=normalize(vNormal);
+vec3 lightDir=normalize(vec3(-.5,.35,1.));
+float diffuse=max(dot(n,lightDir),0.);
+
+float latitude=abs(vUv.y-.5)*2.;
+float oceanHue=smoothstep(-.85,.90,broad*.55*clamp(uStrength,0.,1.)+(.65-latitude)*.7+base.g);
+
+vec3 water=mix(vec3(.13,.26,.85),vec3(.04,.83,.88),oceanHue);
+water=mix(water,vec3(.38,.28,.90),smoothstep(.45,.88,latitude)*.55);
+
+float current=pow(.5+.5*sin(2.1*q.x+3.6*q.y+1.8*twist-.7*uTime),5.);
+water=mix(water,vec3(.78,.97,1.),clamp((foam*.83+current*.19)*uStrength,0.,.93));
+
+float brightness=dot(base,vec3(.2126,.7152,.0722));
+float vegetation=smoothstep(-.17,.035,base.g-base.r)*smoothstep(-.025,.095,base.g-base.b);
+float desert=smoothstep(.035,.24,base.r-base.b)*smoothstep(.11,.55,brightness);
+
+vec3 land=mix(
+ clamp(vec3(brightness)+(base-brightness)*1.65,0.,1.),
+ vec3(.97,.62,.24),
+ desert*.74
+);
+
+land=mix(
+ land,
+ mix(vec3(.07,.49,.23),vec3(.46,.88,.23),smoothstep(.04,.45,brightness)),
+ vegetation*.84
+);
+
+float ice=smoothstep(.54,.87,brightness)*(1.-smoothstep(.04,.16,max(base.r,base.g)-base.b));
+land=mix(land,vec3(.84,.95,1.),ice*.62);
+
+vec3 color=mix(land,water,ocean);
+color*=.59+.41*diffuse;
+
+float rim=pow(1.-max(dot(n,normalize(-vPos)),0.),3.);
+vec3 rimColor=mix(vec3(.20,.93,1.),vec3(.74,.42,1.),smoothstep(-.8,.8,n.x));
+color=mix(color,rimColor,rim*.7);
+
+if(uTemperature>.5){
+
+float blueExcess=base.b-max(base.r,base.g);
+float blueRatio=blueExcess/max(.025,max(base.r,max(base.g,base.b)));
+float seaMask=max(ocean,max(smoothstep(.003,.017,blueExcess),smoothstep(.045,.15,blueRatio)));
+
+vec2 degrees=(vUv-.5)*vec2(360.,180.);
+
+float amazon=inlandPatch(degrees,vec2(-60.,-6.),vec2(17.,13.));
+float brazil=inlandPatch(degrees,vec2(-51.,-13.),vec2(11.,12.));
+float northBrazil=inlandPatch(degrees,vec2(-46.,-6.),vec2(7.,6.));
+float northernAndes=inlandPatch(degrees,vec2(-73.,3.),vec2(5.,7.));
+float centralAndes=inlandPatch(degrees,vec2(-68.,-16.),vec2(5.,13.));
+float chaco=inlandPatch(degrees,vec2(-61.,-23.),vec2(7.,9.));
+float pampas=inlandPatch(degrees,vec2(-64.,-34.),vec2(6.,10.));
+float patagonia=inlandPatch(degrees,vec2(-68.,-46.),vec2(3.,7.));
+
+float southInterior=max(
+ max(max(amazon,brazil),max(northBrazil,northernAndes)),
+ max(max(centralAndes,chaco),max(pampas,patagonia))
+);
+
+float sahara=inlandPatch(degrees,vec2(12.,23.),vec2(23.,8.));
+float centralAfrica=inlandPatch(degrees,vec2(22.,5.),vec2(14.,15.));
+float southernAfrica=inlandPatch(degrees,vec2(24.,-17.),vec2(9.,12.));
+
+float inland=max(southInterior,max(sahara,max(centralAfrica,southernAfrica)));
+
+float longitude=vUv.x*6.2831853;
+vec2 drift=vec2(
+ cos(longitude+uThermalTime*.024),
+ sin(longitude+uThermalTime*.024)
+)*6.;
+
+vec2 cloudPosition=drift+vec2(8.,23.)*vUv.y;
+float billows=textureCloud(cloudPosition);
+
+float northAmerica=regionalPatch(vUv,vec2(.218,.774),vec2(.107,.161));
+float centralAmerica=regionalPatch(vUv,vec2(.248,.602),vec2(.046,.061));
+float southAmerica=regionalPatch(vUv,vec2(.334,.380),vec2(.133,.315));
+float southCoverage=max(southAmerica,southInterior);
+float america=max(northAmerica,max(centralAmerica,southAmerica));
+float africa=regionalPatch(vUv,vec2(.556,.507),vec2(.121,.209));
+float europe=regionalPatch(vUv,vec2(.554,.783),vec2(.103,.109));
+float asia=regionalPatch(vUv,vec2(.760,.73),vec2(.155,.182));
+float australia=regionalPatch(vUv,vec2(.872,.359),vec2(.084,.119));
+float newZealand=regionalPatch(vUv,vec2(.980,.268),vec2(.039,.075));
+float newGuinea=regionalPatch(vUv,vec2(.896,.462),vec2(.067,.050));
+float oceania=max(australia,max(newZealand,newGuinea));
+
+float region=max(max(america,africa),max(max(europe,asia),oceania));
+float floorGlow=mix(.42,.75,max(inland,southCoverage));
+float core=mix(floorGlow,1.,smoothstep(.24,.66,billows));
+float halo=.42+.58*smoothstep(.13,.42,billows)*(1.-.55*core);
+
+float landMask=max(1.-smoothstep(.06,.34,seaMask),inland);
+float cloudOpacity=landMask*mix(.67,1.,min(1.,region+.25*max(america,africa)));
+
+float heat=1.-smoothstep(.15,.78,latitude);
+
+vec3 blue=vec3(.10,.40,1.);
+vec3 yellow=vec3(1.,.86,.12);
+vec3 orange=vec3(1.,.37,.06);
+
+vec3 thermal=mix(blue,yellow,smoothstep(.29,.48,heat));
+thermal=mix(thermal,orange,smoothstep(.62,.82,heat));
+
+float pulse=.9+.1*sin(uThermalTime*1.15+billows*6.);
+vec3 haloColor=thermal;
+vec3 glow=clamp(
+ thermal*core*(.96+.14*america)+haloColor*halo*(.78+.17*america),
+ 0.,1.
+)*cloudOpacity*pulse;
+
+vec2 veilPosition=cloudPosition*1.8+vec2(.21,-.82)*uThermalTime;
+float veil=smoothstep(.43,.75,textureCloud(veilPosition));
+float ribbon=.5+.5*sin(vUv.y*135.+3.6*billows-uThermalTime*1.8);
+float shimmer=veil*smoothstep(.58,.92,ribbon)*landMask*.52;
+
+color=1.-(1.-clamp(color,0.,1.))*(1.-glow);
+color=mix(color,mix(thermal,vec3(1.),.6),shimmer);
+}
+
+if(uNox>.5){
+
+vec2 coords=(vUv-.5)*vec2(360.,180.);
+vec2 flow=coords+vec2(
+ 1.5*sin(uNoxTime*.55+coords.y*.21),
+ sin(uNoxTime*.7+coords.x*.17)
+);
+
+float northAmerica=max(
+ pollutionPlume(flow,vec2(-88.,41.),vec2(19.,9.)),
+ .76*pollutionPlume(flow,vec2(-99.,19.),vec2(9.,6.))
+);
+
+float europe=.91*pollutionPlume(flow,vec2(10.,50.),vec2(19.,8.));
+float africa=.67*pollutionPlume(flow,vec2(5.,8.),vec2(12.,7.));
+float southAmerica=.74*pollutionPlume(flow,vec2(-47.,-22.),vec2(12.,8.));
+float southAsia=.96*pollutionPlume(flow,vec2(82.,26.),vec2(19.,8.));
+float eastAsia=pollutionPlume(flow,vec2(117.,36.),vec2(18.,12.));
+
+float density=max(
+ max(northAmerica,europe),
+ max(max(africa,southAmerica),max(southAsia,eastAsia))
+);
+
+float lon=vUv.x*6.2831853;
+float lat=(vUv.y-.5)*3.14159265;
+float time=uNoxTime*.32;
+
+vec2 drift=vec2(cos(lon),sin(lon))*9.+vec2(12.,22.)*lat;
+vec2 smoke=drift+vec2(-.48,.24)*time;
+
+vec2 curls=vec2(
+ textureCloud(smoke*.67),
+ textureCloud(smoke*.74+vec2(5.,9.))
+)-.5;
+
+vec2 warped=smoke+curls*5.;
+float billow=textureCloud(warped);
+float wisps=textureCloud(warped*vec2(1.25,2.1)+vec2(.18,-.35)*time);
+float smokeBody=smoothstep(.30,.72,.69*billow+.31*wisps);
+float polar=1.-smoothstep(1.0,1.45,abs(lat));
+float dense=smoothstep(.18,.78,density*(.76+.24*billow));
+
+vec3 mist=mix(vec3(.58,.78,.51),vec3(.18,.46,.13),smokeBody);
+mist=mix(mist,vec3(.022,.145,.035),dense);
+
+float detail=dot(base,vec3(.30,.58,.12));
+float relief=mix(.79,1.10,smoothstep(.02,.55,detail))*(.74+.26*diffuse);
+
+float landCoverage=noxShoreLand(vUv);
+float coastalSmoke=0.;
+
+if(landCoverage<.99){
+ for(int stepIndex=1;stepIndex<=5;stepIndex++){
+  float distance=float(stepIndex);
+  vec2 dx=vec2(distance*.0030,0.);
+  vec2 dy=vec2(0.,distance*.0060);
+
+  float nearbyLand=max(
+   max(noxShoreLand(vUv+dx),noxShoreLand(vUv-dx)),
+   max(noxShoreLand(vUv+dy),noxShoreLand(vUv-dy))
   );
 
-  vec2 degrees=(vUv-.5)*vec2(360.,180.);
-
-  float amazon=inlandPatch(degrees,vec2(-60.,-6.),vec2(17.,13.));
-  float brazil=inlandPatch(degrees,vec2(-51.,-13.),vec2(11.,12.));
-  float northBrazil=inlandPatch(degrees,vec2(-46.,-6.),vec2(7.,6.));
-  float northernAndes=inlandPatch(degrees,vec2(-73.,3.),vec2(5.,7.));
-  float centralAndes=inlandPatch(degrees,vec2(-68.,-16.),vec2(5.,13.));
-  float chaco=inlandPatch(degrees,vec2(-61.,-23.),vec2(7.,9.));
-  float pampas=inlandPatch(degrees,vec2(-64.,-34.),vec2(6.,10.));
-  float patagonia=inlandPatch(degrees,vec2(-68.,-46.),vec2(3.,7.));
-
-  float southInterior=max(
-   max(max(amazon,brazil),max(northBrazil,northernAndes)),
-   max(max(centralAndes,chaco),max(pampas,patagonia))
+  coastalSmoke=max(
+   coastalSmoke,
+   nearbyLand*.30*(1.-smoothstep(0.,5.5,distance))
   );
-
-  float sahara=inlandPatch(degrees,vec2(12.,23.),vec2(23.,8.));
-  float centralAfrica=inlandPatch(degrees,vec2(22.,5.),vec2(14.,15.));
-  float southernAfrica=inlandPatch(degrees,vec2(24.,-17.),vec2(9.,12.));
-
-  float inland=max(southInterior,max(sahara,max(centralAfrica,southernAfrica)));
-
-  float landMask=max(1.-smoothstep(.06,.34,seaMask),inland);
-
-  float longitude=vUv.x*6.2831853;
-
-  vec2 drift=vec2(
-   cos(longitude+uThermalTime*.024),
-   sin(longitude+uThermalTime*.024)
-  )*6.;
-
-  vec2 cloudPosition=drift+vec2(8.,23.)*vUv.y;
-
-  float billows=textureCloud(cloudPosition);
-
-  float northAmerica=regionalPatch(vUv,vec2(.218,.774),vec2(.107,.161));
-  float centralAmerica=regionalPatch(vUv,vec2(.248,.602),vec2(.046,.061));
-  float southAmerica=regionalPatch(vUv,vec2(.334,.380),vec2(.133,.315));
-
-  float southCoverage=max(southAmerica,southInterior);
-  float america=max(northAmerica,max(centralAmerica,southAmerica));
-
-  float africa=regionalPatch(vUv,vec2(.556,.507),vec2(.121,.209));
-  float europe=regionalPatch(vUv,vec2(.554,.783),vec2(.103,.109));
-  float asia=regionalPatch(vUv,vec2(.760,.73),vec2(.155,.182));
-  float australia=regionalPatch(vUv,vec2(.872,.359),vec2(.084,.119));
-  float newZealand=regionalPatch(vUv,vec2(.980,.268),vec2(.039,.075));
-  float newGuinea=regionalPatch(vUv,vec2(.896,.462),vec2(.067,.050));
-
-  float oceania=max(australia,max(newZealand,newGuinea));
-
-  float region=max(max(america,africa),max(max(europe,asia),oceania));
-
-  float floorGlow=mix(.42,.75,max(inland,southCoverage));
-  float core=mix(floorGlow,1.,smoothstep(.24,.66,billows));
-  float halo=.42+.58*smoothstep(.13,.42,billows)*(1.-.55*core);
-
-  float cloudOpacity=landMask*mix(.67,1.,min(1.,region+.25*max(america,africa)));
-
-  float heat=1.-smoothstep(.15,.78,latitude);
-
-  vec3 blue=vec3(.10,.40,1.);
-  vec3 yellow=vec3(1.,.86,.12);
-  vec3 orange=vec3(1.,.37,.06);
-
-  vec3 thermal=mix(blue,yellow,smoothstep(.29,.48,heat));
-  thermal=mix(thermal,orange,smoothstep(.62,.82,heat));
-
-  float pulse=.9+.1*sin(uThermalTime*1.15+billows*6.);
-
-  vec3 glow=clamp(
-   thermal*core*(.96+.14*america)+thermal*halo*(.78+.17*america),
-   0.,1.
-  )*cloudOpacity*pulse;
-
-  vec2 veilPosition=cloudPosition*1.8+vec2(.21,-.82)*uThermalTime;
-
-  float veil=smoothstep(.43,.75,textureCloud(veilPosition));
-  float ribbon=.5+.5*sin(vUv.y*135.+3.6*billows-uThermalTime*1.8);
-
-  float shimmer=veil*smoothstep(.58,.92,ribbon)*landMask*.52;
-
-  color=1.-(1.-clamp(color,0.,1.))*(1.-glow);
-
-  color=mix(color,mix(thermal,vec3(1.),.6),shimmer);
  }
+}
 
- /* NOX */
+float coverage=polar*clamp(.05+.40*smokeBody+.57*dense,0.,.92)*mix(coastalSmoke,1.,landCoverage);
+color=mix(color,mist*relief,coverage);
+}
 
- if(uNox>.5){
-
-  vec2 coords=(vUv-.5)*vec2(360.,180.);
-
-  vec2 flow=coords+vec2(
-   1.5*sin(uNoxTime*.55+coords.y*.21),
-   sin(uNoxTime*.7+coords.x*.17)
-  );
-
-  float northAmerica=max(
-   pollutionPlume(flow,vec2(-88.,41.),vec2(19.,9.)),
-   .76*pollutionPlume(flow,vec2(-99.,19.),vec2(9.,6.))
-  );
-
-  float europe=.91*pollutionPlume(flow,vec2(10.,50.),vec2(19.,8.));
-  float africa=.67*pollutionPlume(flow,vec2(5.,8.),vec2(12.,7.));
-  float southAmerica=.74*pollutionPlume(flow,vec2(-47.,-22.),vec2(12.,8.));
-  float southAsia=.96*pollutionPlume(flow,vec2(82.,26.),vec2(19.,8.));
-  float eastAsia=pollutionPlume(flow,vec2(117.,36.),vec2(18.,12.));
-
-  float density=max(
-   max(northAmerica,europe),
-   max(max(africa,southAmerica),max(southAsia,eastAsia))
-  );
-
-  float lon=vUv.x*6.2831853;
-  float lat=(vUv.y-.5)*3.14159265;
-
-  float time=uNoxTime*.32;
-
-  vec2 drift=vec2(cos(lon),sin(lon))*9.+vec2(12.,22.)*lat;
-  vec2 smoke=drift+vec2(-.48,.24)*time;
-
-  vec2 curls=vec2(
-   textureCloud(smoke*.67),
-   textureCloud(smoke*.74+vec2(5.,9.))
-  )-.5;
-
-  vec2 warped=smoke+curls*5.;
-
-  float billow=textureCloud(warped);
-  float wisps=textureCloud(warped*vec2(1.25,2.1)+vec2(.18,-.35)*time);
-
-  float smokeBody=smoothstep(.30,.72,.69*billow+.31*wisps);
-
-  float polar=1.-smoothstep(1.0,1.45,abs(lat));
-  float dense=smoothstep(.18,.78,density*(.76+.24*billow));
-
-  vec3 mist=mix(vec3(.58,.78,.51),vec3(.18,.46,.13),smokeBody);
-  mist=mix(mist,vec3(.022,.145,.035),dense);
-
-  float detail=dot(base,vec3(.30,.58,.12));
-  float relief=mix(.79,1.10,smoothstep(.02,.55,detail))*(.74+.26*diffuse);
-
-  float landCoverage=noxShoreLand(vUv);
-  float coastalSmoke=0.;
-
-  if(landCoverage<.99){
-
-   for(int stepIndex=1;stepIndex<=5;stepIndex++){
-
-    float distance=float(stepIndex);
-
-    vec2 dx=vec2(distance*.0030,0.);
-    vec2 dy=vec2(0.,distance*.0060);
-
-    float nearbyLand=max(
-     max(noxShoreLand(vUv+dx),noxShoreLand(vUv-dx)),
-     max(noxShoreLand(vUv+dy),noxShoreLand(vUv-dy))
-    );
-
-    coastalSmoke=max(
-     coastalSmoke,
-     nearbyLand*.30*(1.-smoothstep(0.,5.5,distance))
-    );
-   }
-  }
-
-  float coverage=polar*clamp(.05+.40*smokeBody+.57*dense,0.,.92)
-   *mix(coastalSmoke,1.,landCoverage);
-
-  color=mix(color,mist*relief,coverage);
- }
-
- gl_FragColor=vec4(clamp(color,0.,1.),1.);
- }
- `
+gl_FragColor=vec4(clamp(color,0.,1.),1.);
+}`
 });
 
-globe.add(new THREE.Mesh(
- new THREE.SphereGeometry(1,160,112),
- material
-));
+/* Corrección de máscara de tierra para el efecto de temperatura. */
+material.fragmentShader=material.fragmentShader.replace(
+ 'float landMask=max(1.-smoothstep(.06,.34,seaMask),inland);float cloudOpacity=landMask*mix(.67,1.,min(1.,region+.25*max(america,africa)));',
+ 'float landMask=max(1.-smoothstep(.06,.34,seaMask),inland);float cloudOpacity=landMask*mix(.67,1.,min(1.,region+.25*max(america,africa)));'
+);
 
-/* ======================================
-   AURORA
-====================================== */
+material.needsUpdate=true;
+
+globe.add(new THREE.Mesh(new THREE.SphereGeometry(1,160,112),material));
+
+/* =========================
+   AURORAS BOREALES
+========================= */
 
 const auroraUniforms={
  time:{value:0},
@@ -726,72 +411,64 @@ const auroraUniforms={
 };
 
 const auroraMaterial=new THREE.ShaderMaterial({
-
  uniforms:auroraUniforms,
  transparent:true,
  depthWrite:false,
  blending:THREE.AdditiveBlending,
  side:THREE.DoubleSide,
 
- vertexShader:`
- uniform float time;
+ vertexShader:`uniform float time;
  varying vec2 curtain;
 
  void main(){
+ curtain=uv;
+ float longitude=uv.x*6.2831853;
+ float height=uv.y;
 
-  curtain=uv;
+ float latitude=
+ 1.15
+ +.105*sin(longitude*3.+time*.4)
+ +.048*sin(longitude*9.-time*.6)
+ +.025*sin(longitude*17.+height*5.-time*.9);
 
-  float longitude=uv.x*6.2831853;
-  float height=uv.y;
+ float radius=1.016+height*.32;
 
-  float latitude=1.15
-   +.105*sin(longitude*3.+time*.4)
-   +.048*sin(longitude*9.-time*.6)
-   +.025*sin(longitude*17.+height*5.-time*.9);
+ vec3 point=radius*vec3(
+  cos(latitude)*cos(longitude),
+  sin(latitude),
+  cos(latitude)*sin(longitude)
+ );
 
-  float radius=1.016+height*.32;
+ gl_Position=projectionMatrix*modelViewMatrix*vec4(point,1.);
+ }`,
 
-  vec3 point=radius*vec3(
-   cos(latitude)*cos(longitude),
-   sin(latitude),
-   cos(latitude)*sin(longitude)
-  );
-
-  gl_Position=projectionMatrix*modelViewMatrix*vec4(point,1.);
- }
- `,
-
- fragmentShader:`
- uniform float time;
+ fragmentShader:`uniform float time;
  uniform float intensity;
  varying vec2 curtain;
 
  void main(){
+ float longitude=curtain.x*6.2831853;
+ float height=curtain.y;
 
-  float longitude=curtain.x*6.2831853;
-  float height=curtain.y;
+ float fold=sin(longitude*41.+sin(longitude*11.-time)*2.+height*3.);
+ float rays=pow(.5+.5*fold,3.);
+ float pulse=.62+.38*sin(longitude*5.-time*.8);
 
-  float fold=sin(longitude*41.+sin(longitude*11.-time)*2.+height*3.);
-  float rays=pow(.5+.5*fold,3.);
+ float fade=smoothstep(0.,.09,height)*(1.-smoothstep(.15,1.,height));
 
-  float pulse=.62+.38*sin(longitude*5.-time*.8);
+ vec3 color=mix(
+  vec3(.14,1.,.46),
+  vec3(.23,.78,1.),
+  smoothstep(.11,.55,height)
+ );
 
-  float fade=smoothstep(0.,.09,height)*(1.-smoothstep(.15,1.,height));
+ color=mix(color,vec3(1.,.24,.81),smoothstep(.45,.91,height));
 
-  vec3 color=mix(
-   vec3(.14,1.,.46),
-   vec3(.23,.78,1.),
-   smoothstep(.11,.55,height)
-  );
-
-  color=mix(color,vec3(1.,.24,.81),smoothstep(.45,.91,height));
-
-  gl_FragColor=vec4(
-   color,
-   intensity*fade*(.37+.63*rays)*pulse
-  );
- }
- `
+ gl_FragColor=vec4(
+  color,
+  intensity*fade*(.37+.63*rays)*pulse
+ );
+ }`
 });
 
 const aurora=new THREE.Mesh(
@@ -800,26 +477,22 @@ const aurora=new THREE.Mesh(
 );
 
 aurora.frustumCulled=false;
+aurora.visible=false;
 globe.add(aurora);
 
-/* ======================================
-   SISTEMA DE EFECTOS
-====================================== */
+/* =========================
+   BOTONES DE EFECTOS
+========================= */
 
 function bindEffect(id,apply){
-
  const button=document.getElementById(id);
 
+ apply(button.getAttribute('aria-pressed')==='true');
+
  button.addEventListener('click',()=>{
-
   const enabled=button.getAttribute('aria-pressed')!=='true';
-
   button.setAttribute('aria-pressed',String(enabled));
-
   apply(enabled);
-
-  updateEffectSound(id,enabled);
-
  });
 }
 
@@ -839,9 +512,9 @@ bindEffect('toggle-water',enabled=>{
  uniforms.uStrength.value=enabled?1.2:0;
 });
 
-/* ======================================
+/* =========================
    PRECIPITACIÓN
-====================================== */
+========================= */
 
 const rainTime={value:0};
 const rainCover={value:0};
@@ -850,26 +523,21 @@ const rainLayer=new THREE.Mesh(
  new THREE.SphereGeometry(1.012,128,80),
 
  new THREE.ShaderMaterial({
-
   transparent:true,
   depthWrite:false,
-
   uniforms:{
    time:rainTime,
    rainCover
   },
 
-  vertexShader:`
-  varying vec2 rainUV;
+  vertexShader:`varying vec2 rainUV;
 
   void main(){
    rainUV=uv;
    gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);
-  }
-  `,
+  }`,
 
-  fragmentShader:`
-  uniform float time;
+  fragmentShader:`uniform float time;
   uniform float rainCover;
   varying vec2 rainUV;
 
@@ -893,7 +561,6 @@ const rainLayer=new THREE.Mesh(
   }
 
   float front(vec2 uv,vec2 center,float turn,float phase){
-
    vec2 p=uv-center;
    p.x=(fract(p.x+.5)-.5)*1.85;
 
@@ -902,7 +569,10 @@ const rainLayer=new THREE.Mesh(
    float grain=textureCloud(p*137.+phase);
 
    float curl=cos(
-    bearing*turn+2.3*log(max(r,.006))-phase+.95*grain
+    bearing*turn
+    +2.3*log(max(r,.006))
+    -phase
+    +.95*grain
    );
 
    float ribbon=smoothstep(.72,.98,curl);
@@ -916,7 +586,6 @@ const rainLayer=new THREE.Mesh(
   }
 
   float movingFront(vec2 uv,vec2 origin,float speed,float turn,float t,float offset){
-
    float age=fract(t*.24+offset);
    float cycle=floor(t*.24+offset);
 
@@ -926,7 +595,6 @@ const rainLayer=new THREE.Mesh(
    );
 
    float shape=front(uv,center,turn,t+offset*6.28);
-
    return shape*lifecycle(age);
   }
 
@@ -934,21 +602,18 @@ const rainLayer=new THREE.Mesh(
 
    vec2 uv=rainUV;
    float t=time*.38;
-
    float lon=6.2831853*uv.x;
 
-   float flow=sin(lon*6.+uv.y*18.-t)*.032
+   float flow=
+    sin(lon*6.+uv.y*18.-t)*.032
     +sin(lon*11.+t*.87)*.009;
 
    float driftLon=lon-t*.34;
 
-   vec2 globe=vec2(cos(driftLon),sin(driftLon))*11.
-    +vec2(19.,39.)*uv.y;
-
+   vec2 globe=vec2(cos(driftLon),sin(driftLon))*11.+vec2(19.,39.)*uv.y;
    float grain=textureCloud(globe);
 
    float equator=1.-smoothstep(.019,.075,abs(uv.y-.54+flow));
-
    float showerAge=fract(t*.29+.5+.19*sin(lon*2.));
 
    float showers=smoothstep(.47,.76,grain)*equator*.9*lifecycle(showerAge);
@@ -966,7 +631,6 @@ const rainLayer=new THREE.Mesh(
    fronts=max(fronts,movingFront(uv,vec2(.60,.18),.11,-1.,t,.68));
 
    float strength=clamp(max(showers,fronts)*rainCover,0.,1.);
-
    float frozen=smoothstep(.65,.80,abs(uv.y-.5)*2.+flow);
 
    vec3 rain=mix(
@@ -985,30 +649,26 @@ const rainLayer=new THREE.Mesh(
    );
 
    float rainAlpha=.93*pow(smoothstep(.025,.92,strength),.82);
-
    vec3 precipitation=mix(rain,snow,frozen);
 
    vec2 cloudDrift=globe*1.28+vec2(-.23,.14)*t;
-
    float cloudTexture=textureCloud(cloudDrift);
 
    float cloudAlpha=smoothstep(.54,.75,cloudTexture)*.22;
-
    cloudAlpha+=smoothstep(.25,.55,strength)*smoothstep(.44,.72,grain)*.12;
 
    cloudAlpha*=rainCover*(1.-smoothstep(.84,.99,abs(uv.y-.5)*2.));
 
    float opacity=rainAlpha+cloudAlpha*(1.-rainAlpha);
-
    vec3 cloud=vec3(.80,.88,.97);
 
    vec3 combined=(
-    precipitation*rainAlpha+cloud*cloudAlpha*(1.-rainAlpha)
+    precipitation*rainAlpha
+    +cloud*cloudAlpha*(1.-rainAlpha)
    )/max(.001,opacity);
 
    gl_FragColor=vec4(combined,opacity);
-  }
-  `
+  }`
  })
 );
 
@@ -1021,87 +681,21 @@ const rainSpeedValue=document.getElementById('rain-speed-value');
 let rainSpeed=1;
 
 function updateRainControls(){
-
  const percent=Number(rainSpeedInput.value);
 
  rainSpeed=percent/100;
-
  rainSpeedValue.textContent=percent+' %';
 
  rainLayer.visible=rainButton.getAttribute('aria-pressed')==='true';
-
  rainCover.value=Number(rainLayer.visible);
 }
 
 bindEffect('toggle-rain',updateRainControls);
-
 rainSpeedInput.addEventListener('input',updateRainControls);
 
-/* ======================================
-   PANEL INFORMATIVO
-====================================== */
-
-const descriptions={
-
- 'toggle-aurora':{
-  title:'Aurora boreal',
-  text:'Una aurora boreal es una luz que aparece cerca de los polos cuando partículas del Sol chocan con la atmósfera. El oxígeno la tiñe de verde y rojo, y el nitrógeno de azul y violeta.'
- },
-
- 'toggle-water':{
-  title:'Olas del mar',
-  text:'Las olas nacen cuando el viento empuja la superficie del océano. Dato curioso: transportan energía, no agua.'
- },
-
- 'toggle-temperature':{
-  title:'Temperatura continental',
-  text:'Los satélites miden qué tan caliente o frío está el suelo de los continentes. Los desiertos y las ciudades se calientan más que los bosques o las zonas con agua.'
- },
-
- 'toggle-nox':{
-  title:'Óxidos de nitrógeno (NOₓ)',
-  text:'Los óxidos de nitrógeno son gases que producen los vehículos, las industrias y también los rayos. Duran solo unas horas en el aire, por eso se concentran cerca de ciudades, centrales eléctricas y carreteras.'
- },
-
- 'toggle-rain':{
-  title:'Precipitación global',
-  text:'La lluvia y la nieve de todo el planeta, medidas por satélites de la NASA. Los datos se actualizan cada 30 minutos y muestran cómo viajan las tormentas por el mundo.'
- }
-
-};
-
-const infoPanel=document.getElementById('info-panel');
-const infoTitle=document.getElementById('info-title');
-const infoDescription=document.getElementById('info-description');
-
-document.getElementById('info-close').addEventListener('click',()=>{
- infoPanel.hidden=true;
-});
-
-for(const [id,info] of Object.entries(descriptions)){
-
- document.getElementById(id).addEventListener('click',event=>{
-
-  const enabled=event.currentTarget.getAttribute('aria-pressed')==='true';
-
-  if(enabled){
-
-   infoTitle.textContent=info.title;
-   infoDescription.textContent=info.text;
-   infoPanel.hidden=false;
-
-  }else{
-
-   infoPanel.hidden=true;
-
-  }
-
- });
-}
-
-/* ======================================
+/* =========================
    ESTRELLAS
-====================================== */
+========================= */
 
 const positions=[];
 const starColors=[];
@@ -1114,19 +708,13 @@ const starPalette=[
 ].map(color=>new THREE.Color(color));
 
 for(let i=0;i<2500;i++){
-
  const x=(Math.random()-.5)*100;
  const y=(Math.random()-.5)*100;
  const z=(Math.random()-.5)*100;
 
  if(Math.hypot(x,y,z)>9){
-
   positions.push(x,y,z);
-
-  starColors.push(
-   ...starPalette[i%starPalette.length].toArray()
-  );
-
+  starColors.push(...starPalette[i%starPalette.length].toArray());
  }
 }
 
@@ -1151,330 +739,22 @@ scene.add(new THREE.Points(
  })
 ));
 
-/* ======================================
-   AUDIO DINÁMICO POR COLOR
-====================================== */
-
-let audioContext=null;
-let oscillator1=null;
-let oscillator2=null;
-let audioGain=null;
-let audioFilter=null;
-
-const activeSounds=new Set();
-
-let soundSampleTimer=0;
-
-function initializeAudio(){
-
- if(audioContext){
-
-  if(audioContext.state==='suspended'){
-   audioContext.resume();
-  }
-
-  return true;
- }
-
- const AudioClass=window.AudioContext||window.webkitAudioContext;
-
- if(!AudioClass)return false;
-
- audioContext=new AudioClass();
-
- oscillator1=audioContext.createOscillator();
- oscillator2=audioContext.createOscillator();
-
- audioGain=audioContext.createGain();
- audioFilter=audioContext.createBiquadFilter();
-
- oscillator1.type='sine';
- oscillator2.type='triangle';
-
- oscillator1.frequency.value=220;
- oscillator2.frequency.value=440;
-
- audioFilter.type='lowpass';
- audioFilter.frequency.value=1000;
-
- audioGain.gain.value=0;
-
- oscillator1.connect(audioFilter);
- oscillator2.connect(audioFilter);
-
- audioFilter.connect(audioGain);
- audioGain.connect(audioContext.destination);
-
- oscillator1.start();
- oscillator2.start();
-
- return true;
-}
-
-function startColorSound(){
-
- if(!initializeAudio())return;
-
- const now=audioContext.currentTime;
-
- audioGain.gain.cancelScheduledValues(now);
-
- audioGain.gain.setTargetAtTime(
-  .035,
-  now,
-  .2
- );
-
- document.getElementById('audio-status').textContent=
-  'Audio: sonificando los colores de la Tierra';
-}
-
-function stopColorSound(){
-
- if(!audioContext)return;
-
- const now=audioContext.currentTime;
-
- audioGain.gain.cancelScheduledValues(now);
-
- audioGain.gain.setTargetAtTime(
-  0,
-  now,
-  .2
- );
-
- document.getElementById('audio-status').textContent=
-  'Audio: activa un efecto para comenzar';
-}
-
-function updateEffectSound(id,enabled){
-
- if(enabled){
-
-  activeSounds.add(id);
-
-  startColorSound();
-
- }else{
-
-  activeSounds.delete(id);
-
-  if(activeSounds.size===0){
-   stopColorSound();
-  }
-
- }
-}
-
-/* ======================================
-   ANALIZAR COLORES DEL PLANETA
-====================================== */
-
-const analysisCanvas=document.createElement('canvas');
-const analysisContext=analysisCanvas.getContext('2d',{willReadFrequently:true});
-
-function samplePlanetColors(){
-
- if(!analysisContext)return null;
-
- const canvas=renderer.domElement;
-
- const size=100;
-
- analysisCanvas.width=size;
- analysisCanvas.height=size;
-
- const ctx=analysisContext;
-
- // Se toma una región central del renderizado.
- // El muestreo se realiza desde el canvas visible.
- try{
-
-  ctx.drawImage(
-   canvas,
-   Math.max(0,Math.floor((canvas.width-size)/2)),
-   Math.max(0,Math.floor((canvas.height-size)/2)),
-   size,
-   size,
-   0,
-   0,
-   size,
-   size
-  );
-
-  const pixels=ctx.getImageData(0,0,size,size).data;
-
-  let red=0;
-  let green=0;
-  let blue=0;
-  let count=0;
-
-  for(let i=0;i<pixels.length;i+=4){
-
-   const r=pixels[i]/255;
-   const g=pixels[i+1]/255;
-   const b=pixels[i+2]/255;
-
-   const brightness=(r+g+b)/3;
-
-   if(brightness<.035)continue;
-
-   red+=r;
-   green+=g;
-   blue+=b;
-
-   count++;
-  }
-
-  if(count===0)return null;
-
-  red/=count;
-  green/=count;
-  blue/=count;
-
-  const max=Math.max(red,green,blue);
-  const min=Math.min(red,green,blue);
-  const difference=max-min;
-
-  let hue=0;
-  let saturation=0;
-
-  const lightness=(max+min)/2;
-
-  if(difference!==0){
-
-   saturation=difference/(1-Math.abs(2*lightness-1));
-
-   if(max===red){
-    hue=60*(((green-blue)/difference)%6);
-   }else if(max===green){
-    hue=60*((blue-red)/difference+2);
-   }else{
-    hue=60*((red-green)/difference+4);
-   }
-
-   if(hue<0)hue+=360;
-  }
-
-  return{
-   hue,
-   saturation,
-   lightness
-  };
-
- }catch(error){
-
-  console.warn('No se pudieron analizar los colores:',error);
-
-  return null;
- }
-}
-
-/* ======================================
-   CONVERTIR COLOR EN SONIDO
-====================================== */
-
-function updateColorSound(){
-
- if(!audioContext||activeSounds.size===0)return;
-
- const color=samplePlanetColors();
-
- if(!color)return;
-
- const now=audioContext.currentTime;
-
- const frequency=130+(color.hue/360)*650;
-
- const secondFrequency=frequency*(1.5+color.saturation*.5);
-
- const volume=Math.max(
-  .012,
-  Math.min(.075,.012+color.lightness*.065)
- );
-
- const filterFrequency=250+color.saturation*5200;
-
- oscillator1.frequency.setTargetAtTime(
-  frequency,
-  now,
-  .12
- );
-
- oscillator2.frequency.setTargetAtTime(
-  secondFrequency,
-  now,
-  .12
- );
-
- audioFilter.frequency.setTargetAtTime(
-  filterFrequency,
-  now,
-  .15
- );
-
- audioGain.gain.setTargetAtTime(
-  volume,
-  now,
-  .15
- );
-}
-
-/* ======================================
+/* =========================
    ROTACIÓN Y ZOOM
-====================================== */
-
-let drag=false;
-let px=0;
-let py=0;
+========================= */
 
 let angle=-1.5;
 let tilt=.58;
-
-let targetDistance=3.6;
-
-const MIN_ZOOM=1.8;
-const MAX_ZOOM=7.5;
+let distance=3.6;
 
 const canvas=renderer.domElement;
-
-function changeZoom(amount){
-
- targetDistance=THREE.MathUtils.clamp(
-  targetDistance+amount,
-  MIN_ZOOM,
-  MAX_ZOOM
- );
-}
-
-document.getElementById('zoom-in').addEventListener('click',()=>{
- changeZoom(-.35);
-});
-
-document.getElementById('zoom-out').addEventListener('click',()=>{
- changeZoom(.35);
-});
-
-/* PINCH PARA CELULARES */
-
 const pointers=new Map();
 
-let pinchDistance=0;
-
-function getPointerDistance(){
-
- const points=[...pointers.values()];
-
- if(points.length<2)return 0;
-
- return Math.hypot(
-  points[0].x-points[1].x,
-  points[0].y-points[1].y
- );
-}
+let previousPinch=0;
+let dragPointer=null;
+let px=0,py=0;
 
 canvas.addEventListener('pointerdown',e=>{
-
  pointers.set(e.pointerId,{
   x:e.clientX,
   y:e.clientY
@@ -1483,21 +763,25 @@ canvas.addEventListener('pointerdown',e=>{
  canvas.setPointerCapture(e.pointerId);
 
  if(pointers.size===1){
-
-  drag=true;
+  dragPointer=e.pointerId;
   px=e.clientX;
   py=e.clientY;
+  mount.style.cursor='grabbing';
+ }
 
- }else if(pointers.size===2){
+ if(pointers.size===2){
+  const pts=[...pointers.values()];
 
-  drag=false;
-  pinchDistance=getPointerDistance();
+  previousPinch=Math.hypot(
+   pts[0].x-pts[1].x,
+   pts[0].y-pts[1].y
+  );
 
+  dragPointer=null;
  }
 });
 
 canvas.addEventListener('pointermove',e=>{
-
  if(!pointers.has(e.pointerId))return;
 
  pointers.set(e.pointerId,{
@@ -1505,7 +789,25 @@ canvas.addEventListener('pointermove',e=>{
   y:e.clientY
  });
 
- if(pointers.size===1&&drag){
+ if(pointers.size>=2){
+
+  const pts=[...pointers.values()];
+
+  const pinch=Math.hypot(
+   pts[0].x-pts[1].x,
+   pts[0].y-pts[1].y
+  );
+
+  if(previousPinch>0){
+   distance=Math.max(
+    1.3,
+    Math.min(9,distance+(previousPinch-pinch)*.008)
+   );
+  }
+
+  previousPinch=pinch;
+
+ }else if(dragPointer===e.pointerId){
 
   angle+=(e.clientX-px)*.007;
 
@@ -1513,85 +815,56 @@ canvas.addEventListener('pointermove',e=>{
    -1.45,
    Math.min(1.45,tilt+(e.clientY-py)*.007)
   );
-
-  px=e.clientX;
-  py=e.clientY;
  }
 
- if(pointers.size===2){
-
-  const currentDistance=getPointerDistance();
-
-  if(pinchDistance>0){
-
-   const difference=currentDistance-pinchDistance;
-
-   targetDistance=THREE.MathUtils.clamp(
-    targetDistance-difference*.006,
-    MIN_ZOOM,
-    MAX_ZOOM
-   );
-  }
-
-  pinchDistance=currentDistance;
- }
+ px=e.clientX;
+ py=e.clientY;
 });
 
-function removePointer(e){
-
+function endPointer(e){
  pointers.delete(e.pointerId);
 
- if(pointers.size<2){
-  pinchDistance=0;
- }
+ if(dragPointer===e.pointerId)dragPointer=null;
+ if(pointers.size<2)previousPinch=0;
 
  if(pointers.size===1){
+  const remaining=[...pointers.entries()][0];
 
-  const remaining=[...pointers.values()][0];
+  dragPointer=remaining[0];
+  px=remaining[1].x;
+  py=remaining[1].y;
 
-  px=remaining.x;
-  py=remaining.y;
-
-  drag=true;
-
- }else{
-
-  drag=false;
-
+ }else if(pointers.size===0){
+  mount.style.cursor='grab';
  }
 }
 
-canvas.addEventListener('pointerup',removePointer);
-canvas.addEventListener('pointercancel',removePointer);
-
-/* RUEDA DEL MOUSE */
+canvas.addEventListener('pointerup',endPointer);
+canvas.addEventListener('pointercancel',endPointer);
 
 canvas.addEventListener('wheel',e=>{
-
  e.preventDefault();
 
- let delta=e.deltaY;
-
- if(e.deltaMode===1){
-  delta*=16;
- }else if(e.deltaMode===2){
-  delta*=window.innerHeight;
- }
-
- targetDistance=THREE.MathUtils.clamp(
-  targetDistance+delta*.002,
-  MIN_ZOOM,
-  MAX_ZOOM
+ distance=Math.max(
+  1.3,
+  Math.min(9,distance+e.deltaY*.003)
  );
 
 },{passive:false});
 
-/* ======================================
-   CENTRADO Y TAMAÑO
-====================================== */
+document.getElementById('zoom-in').addEventListener('click',()=>{
+ distance=Math.max(1.3,distance-.35);
+});
+
+document.getElementById('zoom-out').addEventListener('click',()=>{
+ distance=Math.min(9,distance+.35);
+});
+
+/* =========================
+   REDIMENSIONAR
+========================= */
 
 function resize(){
-
  const w=mount.clientWidth;
  const h=mount.clientHeight;
 
@@ -1602,12 +875,711 @@ function resize(){
 }
 
 window.addEventListener('resize',resize);
-
 resize();
 
-/* ======================================
-   ANIMACIÓN
-====================================== */
+/* =========================
+   SONIFICACIÓN DINÁMICA
+========================= */
+
+const waterButton=document.getElementById('toggle-water');
+
+const notes=[130.81,196,261.63];
+
+let audio;
+let waves;
+let filter;
+let voices;
+let wavePan;
+let thermalVoices;
+let rainGain;
+let rainFilter;
+let rainPan;
+let noxGain;
+let noxDissonance;
+let noxPan;
+
+const previous={};
+let nextAudioUpdate=0;
+
+const capture=document.createElement('canvas');
+capture.width=capture.height=64;
+
+const pixels=capture.getContext('2d',{
+ willReadFrequently:true
+});
+
+async function startSound(){
+
+ if(!audio){
+
+  audio=new AudioContext();
+
+  /* Voces de aurora */
+
+  voices=notes.map((frequency,i)=>{
+
+   const tone=audio.createOscillator();
+   const gain=audio.createGain();
+   const pan=audio.createStereoPanner();
+
+   tone.frequency.value=frequency;
+   gain.gain.value=0;
+
+   tone.connect(gain).connect(pan).connect(audio.destination);
+   tone.start();
+
+   return {
+    gain:gain.gain,
+    pan:pan.pan,
+    hue:[140,189,320][i]
+   };
+  });
+
+  /* Ruido de las olas */
+
+  const buffer=audio.createBuffer(
+   1,
+   audio.sampleRate*4,
+   audio.sampleRate
+  );
+
+  const samples=buffer.getChannelData(0);
+
+  for(let i=0;i<samples.length;i++){
+   samples[i]=Math.random()*2-1;
+  }
+
+  const noise=audio.createBufferSource();
+  noise.buffer=buffer;
+  noise.loop=true;
+
+  filter=audio.createBiquadFilter();
+  filter.type='lowpass';
+  filter.Q.value=.45;
+
+  waves=audio.createGain();
+  waves.gain.value=0;
+
+  wavePan=audio.createStereoPanner();
+
+  noise.connect(filter)
+   .connect(waves)
+   .connect(wavePan)
+   .connect(audio.destination);
+
+  noise.start();
+
+  /* Sonido de NOx */
+
+  noxGain=audio.createGain();
+  noxGain.gain.value=0;
+
+  noxDissonance=audio.createGain();
+  noxDissonance.gain.value=0;
+
+  noxPan=audio.createStereoPanner();
+
+  noxGain.connect(noxPan).connect(audio.destination);
+  noxDissonance.connect(noxGain);
+
+  for(const [frequency,destination] of [
+   [110,noxGain],
+   [116.54,noxDissonance]
+  ]){
+
+   const tone=audio.createOscillator();
+
+   tone.frequency.value=frequency;
+   tone.connect(destination);
+   tone.start();
+  }
+
+  /* Sonido de precipitación */
+
+  const rainNoise=audio.createBufferSource();
+
+  rainNoise.buffer=buffer;
+  rainNoise.loop=true;
+
+  rainFilter=audio.createBiquadFilter();
+  rainFilter.type='bandpass';
+  rainFilter.Q.value=.7;
+
+  rainGain=audio.createGain();
+  rainGain.gain.value=0;
+
+  rainPan=audio.createStereoPanner();
+
+  rainNoise.connect(rainFilter)
+   .connect(rainGain)
+   .connect(rainPan)
+   .connect(audio.destination);
+
+  rainNoise.start(0,1.7);
+
+  /* Voces de temperatura */
+
+  thermalVoices=[77.78,98.00,116.54].map(frequency=>{
+
+   const oscillator=audio.createOscillator();
+   const gain=audio.createGain();
+   const pan=audio.createStereoPanner();
+
+   oscillator.frequency.value=frequency;
+   gain.gain.value=0;
+
+   oscillator.connect(gain)
+    .connect(pan)
+    .connect(audio.destination);
+
+   oscillator.start();
+
+   return {
+    volume:gain.gain,
+    pan:pan.pan
+   };
+  });
+ }
+
+ await audio.resume();
+}
+
+/* Captura los colores del planeta */
+
+function framePixels(){
+
+ pixels.drawImage(canvas,0,0,64,64);
+
+ return pixels.getImageData(0,0,64,64).data;
+}
+
+/* Compara los colores y movimiento */
+
+function measure(effect,full,base,greenOnly=false){
+
+ const old=previous[effect];
+
+ const levels=new Float32Array(full.length/4);
+
+ let energy=0;
+ let movement=0;
+ let horizontal=0;
+ let blue=0;
+ let chroma=0;
+
+ for(let j=0;j<levels.length;j++){
+
+  const i=j*4;
+
+  const r=Math.abs(full[i]-base[i]);
+  const g=Math.abs(full[i+1]-base[i+1]);
+  const b=Math.abs(full[i+2]-base[i+2]);
+
+  const change=Math.max(r,g,b)/255;
+
+  const greenCast=Math.max(
+   0,
+   full[i+1]-Math.max(full[i],full[i+2])
+  )/255;
+
+  const level=greenOnly
+   ?Math.min(change,greenCast)*(1-.55*full[i+1]/255)
+   :change;
+
+  levels[j]=level;
+
+  energy+=level;
+
+  if(old){
+   movement+=Math.abs(level-old[j]);
+  }
+
+  horizontal+=level*(2*(j%64)/63-1);
+  blue+=b;
+  chroma+=r+g+b;
+ }
+
+ previous[effect]=levels;
+
+ return {
+  energy,
+  movement,
+  blue:blue/Math.max(1,chroma),
+  pan:Math.max(
+   -1,
+   Math.min(1,1.5*horizontal/Math.max(1,energy))
+  )
+ };
+}
+
+/* Sonido de las olas */
+
+function setNoise(effect,full,base,gain,tone,stereo,now){
+
+ const {
+  energy,
+  movement,
+  blue,
+  pan
+ }=measure(effect,full,base);
+
+ const strength=1-Math.exp(-energy/45);
+ const accent=1-Math.exp(-movement/30);
+
+ gain.gain.setTargetAtTime(
+  strength*(.10+.35*accent),
+  now,
+  .13
+ );
+
+ tone.frequency.setTargetAtTime(
+  320+1150*blue+900*accent,
+  now,
+  .15
+ );
+
+ stereo.pan.setTargetAtTime(
+  pan,
+  now,
+  .18
+ );
+}
+
+/* Interpretación de colores de temperatura */
+
+function thermalWeights(full,base,i){
+
+ const red=Math.max(0,full[i]-base[i]);
+ const green=Math.max(0,full[i+1]-base[i+1]);
+ const blue=Math.max(0,full[i+2]-base[i+2]);
+
+ const r=red/Math.max(24,255-base[i]);
+ const g=green/Math.max(24,255-base[i+1]);
+ const b=blue/Math.max(24,255-base[i+2]);
+
+ const level=Math.min(
+  1,
+  Math.max(red,green,blue)/255
+ );
+
+ const cold=Math.max(
+  0,
+  Math.min(1,(b-r)/Math.max(.01,b+r)*2.5)
+ );
+
+ const warm=(1-cold)*Math.max(
+  0,
+  Math.min(1,(r-b)/Math.max(.01,r+b)*2.5)
+ );
+
+ const yellow=Math.max(
+  0,
+  Math.min(1,(g/Math.max(.01,r)-.50)/.28)
+ );
+
+ return [
+  level*cold,
+  level*warm*yellow,
+  level*warm*(1-yellow)
+ ];
+}
+
+function updateTemperature(full,base,now){
+
+ const old=previous.temperature;
+ const count=thermalVoices.length;
+
+ const levels=new Float32Array(full.length/4*count);
+
+ const energy=[0,0,0];
+ const motion=[0,0,0];
+ const horizontal=[0,0,0];
+
+ for(let i=0,j=0;i<full.length;i+=4,j+=count){
+
+  const weights=thermalWeights(full,base,i);
+  const x=2*((i/4)%64)/63-1;
+
+  for(let k=0;k<count;k++){
+
+   const level=weights[k];
+
+   levels[j+k]=level;
+   energy[k]+=level;
+   horizontal[k]+=level*x;
+
+   if(old){
+    motion[k]+=Math.abs(level-old[j+k]);
+   }
+  }
+ }
+
+ previous.temperature=levels;
+
+ thermalVoices.forEach((voice,k)=>{
+
+  const accent=1+.3*(1-Math.exp(-motion[k]/10));
+
+  voice.volume.setTargetAtTime(
+   .064*(1-Math.exp(-energy[k]/22))*accent,
+   now,
+   .16
+  );
+
+  const pan=1.5*horizontal[k]/Math.max(1,energy[k]);
+
+  voice.pan.setTargetAtTime(
+   Math.max(-1,Math.min(1,pan)),
+   now,
+   .18
+  );
+ });
+}
+
+/* Interpretación de precipitación */
+
+function rainPixel(full,base,i){
+
+ const r=full[i]/255;
+ const g=full[i+1]/255;
+ const b=full[i+2]/255;
+
+ const change=Math.max(
+  Math.abs(full[i]-base[i]),
+  Math.abs(full[i+1]-base[i+1]),
+  Math.abs(full[i+2]-base[i+2])
+ )/255;
+
+ const chroma=Math.max(r,g,b)-Math.min(r,g,b);
+ const liquid=b<Math.max(r,g)*.72;
+
+ const severity=liquid
+  ?Math.min(1,r/Math.max(.05,g)*.55)
+  :Math.min(1,r/Math.max(.05,b)*1.4);
+
+ const tint=Math.max(0,chroma-.09);
+
+ return {
+  energy:change*tint*(.40+.60*severity),
+  severity,
+  liquid
+ };
+}
+
+function updateRainSound(full,base,now){
+
+ const old=previous.rain;
+
+ const levels=new Float32Array(full.length/4);
+
+ let total=0;
+ let movement=0;
+ let intensity=0;
+ let liquidEnergy=0;
+ let position=0;
+
+ for(let j=0;j<levels.length;j++){
+
+  const {
+   energy,
+   severity,
+   liquid
+  }=rainPixel(full,base,j*4);
+
+  levels[j]=energy;
+
+  total+=energy;
+  intensity+=energy*severity;
+
+  if(liquid){
+   liquidEnergy+=energy;
+  }
+
+  if(old){
+   movement+=Math.abs(energy-old[j]);
+  }
+
+  position+=energy*(2*(j%64)/63-1);
+ }
+
+ previous.rain=levels;
+
+ const brightness=1-Math.exp(-total/18);
+ const motion=1-Math.exp(-movement/12);
+
+ const weight=Math.max(.001,total);
+ const rainShare=liquidEnergy/weight;
+ const force=intensity/weight;
+
+ rainGain.gain.setTargetAtTime(
+  brightness*(.11+.17*force+.08*motion),
+  now,
+  .20
+ );
+
+ rainFilter.frequency.setTargetAtTime(
+  500+550*rainShare+1500*force+380*motion,
+  now,
+  .23
+ );
+
+ rainPan.pan.setTargetAtTime(
+  Math.max(-1,Math.min(1,1.5*position/weight)),
+  now,
+  .28
+ );
+}
+
+/* Sonido de contaminación NOx */
+
+function updateNoxSound(full,base,now){
+
+ const {
+  energy,
+  movement,
+  pan
+ }=measure('nox',full,base,true);
+
+ const density=1-Math.exp(-energy/95);
+ const motion=1-Math.exp(-movement/23);
+
+ noxGain.gain.setTargetAtTime(
+  .072*density*(.78+.22*motion),
+  now,
+  .17
+ );
+
+ noxDissonance.gain.setTargetAtTime(
+  .24+.46*density,
+  now,
+  .21
+ );
+
+ noxPan.pan.setTargetAtTime(
+  pan,
+  now,
+  .23
+ );
+}
+
+/* Renderizado y análisis de efectos */
+
+function renderSound(){
+
+ const active=audio?.state==='running';
+
+ const effects=[
+  {
+   name:'aurora',
+   object:aurora,
+   key:'visible',
+   off:false
+  },
+  {
+   name:'waves',
+   object:uniforms.uStrength,
+   key:'value',
+   off:0
+  },
+  {
+   name:'temperature',
+   object:uniforms.uTemperature,
+   key:'value',
+   off:0
+  },
+  {
+   name:'rain',
+   object:rainCover,
+   key:'value',
+   off:0
+  },
+  {
+   name:'nox',
+   object:uniforms.uNox,
+   key:'value',
+   off:0
+  }
+ ];
+
+ const sampled={};
+
+ if(active&&audio.currentTime>=nextAudioUpdate){
+
+  nextAudioUpdate=audio.currentTime+.12;
+
+  for(const effect of effects){
+
+   const value=effect.object[effect.key];
+
+   if(!value){
+    delete previous[effect.name];
+    continue;
+   }
+
+   effect.object[effect.key]=effect.off;
+
+   try{
+
+    renderer.render(scene,camera);
+    sampled[effect.name]=framePixels();
+
+   }finally{
+
+    effect.object[effect.key]=value;
+   }
+  }
+ }
+
+ renderer.render(scene,camera);
+
+ if(!active)return;
+
+ const now=audio.currentTime;
+
+ if(!uniforms.uStrength.value){
+  waves.gain.setTargetAtTime(0,now,.07);
+ }
+
+ if(!aurora.visible){
+  for(const voice of voices){
+   voice.gain.setTargetAtTime(0,now,.07);
+  }
+ }
+
+ if(!uniforms.uNox.value){
+  noxGain.gain.setTargetAtTime(0,now,.09);
+ }
+
+ if(!rainCover.value){
+  rainGain.gain.setTargetAtTime(0,now,.09);
+ }
+
+ if(!uniforms.uTemperature.value){
+  for(const voice of thermalVoices){
+   voice.volume.setTargetAtTime(0,now,.07);
+  }
+ }
+
+ if(!Object.keys(sampled).length)return;
+
+ const full=framePixels();
+
+ if(sampled.waves){
+  setNoise(
+   'waves',
+   full,
+   sampled.waves,
+   waves,
+   filter,
+   wavePan,
+   now
+  );
+ }
+
+ if(sampled.nox){
+  updateNoxSound(full,sampled.nox,now);
+ }
+
+ if(sampled.rain){
+  updateRainSound(full,sampled.rain,now);
+ }
+
+ if(sampled.temperature){
+  updateTemperature(full,sampled.temperature,now);
+ }
+
+ const background=sampled.aurora;
+
+ if(!background)return;
+
+ const change=measure(
+  'aurora',
+  full,
+  background
+ ).movement;
+
+ const energy=[0,0,0];
+ const weightedX=[0,0,0];
+
+ for(let i=0;i<full.length;i+=4){
+
+  const r=Math.max(0,full[i]-background[i]);
+  const g=Math.max(0,full[i+1]-background[i+1]);
+  const b=Math.max(0,full[i+2]-background[i+2]);
+
+  const max=Math.max(r,g,b);
+  const spread=max-Math.min(r,g,b);
+
+  if(max<8||spread<4)continue;
+
+  const sector=max===r
+   ?(g-b)/spread
+   :max===g
+    ?2+(b-r)/spread
+    :4+(r-g)/spread;
+
+  const hue=(sector*60+360)%360;
+  const x=2*((i/4)%64)/63-1;
+
+  voices.forEach((voice,j)=>{
+
+   const distance=Math.abs(
+    (hue-voice.hue+540)%360-180
+   );
+
+   const weight=Math.max(
+    0,
+    1-distance/65
+   )*spread/255;
+
+   energy[j]+=weight;
+   weightedX[j]+=weight*x;
+  });
+ }
+
+ voices.forEach((voice,i)=>{
+
+  const level=energy[i];
+
+  const pan=level
+   ?Math.max(-1,Math.min(1,1.6*weightedX[i]/level))
+   :0;
+
+  voice.gain.setTargetAtTime(
+   .11*[1,.8,.6][i]
+   *(1-Math.exp(-level/16))
+   *(1+.25*(1-Math.exp(-change/18))),
+   now,
+   .12
+  );
+
+  voice.pan.setTargetAtTime(
+   pan,
+   now,
+   .16
+  );
+ });
+}
+
+/* Activar audio al interactuar */
+
+for(const target of [
+ canvas,
+ waterButton,
+ document.getElementById('toggle-aurora'),
+ document.getElementById('toggle-temperature'),
+ document.getElementById('toggle-rain'),
+ document.getElementById('toggle-nox')
+]){
+
+ target.addEventListener('click',()=>{
+  startSound().catch(console.error);
+ });
+}
+
+/* =========================
+   ANIMACIÓN PRINCIPAL
+========================= */
 
 const clock=new THREE.Clock();
 
@@ -1640,22 +1612,10 @@ function animate(){
   rainTime.value+=dt*rainSpeed;
  }
 
- camera.position.z+=
-  (targetDistance-camera.position.z)*.10;
-
+ camera.position.z+=(distance-camera.position.z)*.12;
  camera.lookAt(0,0,0);
 
- renderer.render(scene,camera);
-
- // Muestreo de colores varias veces por segundo.
- soundSampleTimer+=dt;
-
- if(soundSampleTimer>=.15){
-
-  soundSampleTimer=0;
-
-  updateColorSound();
- }
+ renderSound();
 }
 
 animate();
@@ -1664,16 +1624,11 @@ animate();
 
  console.error(e);
 
- mount.innerHTML=`
- <div style="padding:24px;color:white;font:16px system-ui">
-  No se pudo cargar la experiencia 3D.
-  Comprueba tu conexión a Internet y vuelve a cargar la página.
-  <br><small>${String(e.message||e)}</small>
- </div>
-`;
-
+ mount.innerHTML=
+ '<div style="padding:24px;color:#fff;font:16px system-ui">'+
+ 'No se pudo cargar la experiencia 3D. Comprueba tu conexión a Internet y vuelve a cargar la página.<br>'+
+ '<small>'+String(e.message||e)+'</small></div>';
 }
-
 </script>
 </body>
 </html>
