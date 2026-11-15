@@ -96,6 +96,33 @@ body {
     opacity: .5;
 }
 
+/* BOTÓN DEL MENÚ */
+
+.menu-boton {
+    position: fixed;
+    top: 24px;
+    left: 24px;
+    z-index: 20;
+    width: 46px;
+    height: 46px;
+    border: 1px solid #45baff66;
+    border-radius: 12px;
+    background: #071b35dd;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+    transition: .3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.menu-boton:hover {
+    background: #0875c9;
+    box-shadow: 0 0 18px #168bff88;
+}
+
 /* CONTENEDOR */
 
 .contenedor {
@@ -106,7 +133,7 @@ body {
     align-items: center;
     justify-content: center;
     position: relative;
-    padding: 90px 15px 65px;
+    padding: 125px 15px 75px;
     z-index: 1;
 }
 
@@ -115,7 +142,8 @@ body {
 header {
     position: absolute;
     top: 22px;
-    width: 100%;
+    left: 85px;
+    right: 25px;
     text-align: center;
     z-index: 2;
 }
@@ -126,12 +154,14 @@ h1 {
     letter-spacing: 4px;
     color: white;
     text-shadow: 0 0 18px #168bff;
+    line-height: 1.1;
 }
 
 header p {
     font-size: clamp(9px, 2vw, 13px);
     letter-spacing: 3px;
     color: #a9d9ff;
+    margin-top: 3px;
 }
 
 /* PLANETA */
@@ -150,7 +180,7 @@ header p {
     display: block;
 }
 
-/* BOTÓN */
+/* BOTÓN INICIAR */
 
 .boton-iniciar {
     margin-top: 12px;
@@ -179,31 +209,7 @@ header p {
     color: white;
 }
 
-/* BOTÓN DEL MENÚ LATERAL */
-
-.menu-boton {
-    position: fixed;
-    top: 25px;
-    left: 25px;
-    z-index: 20;
-    width: 48px;
-    height: 48px;
-    border: 1px solid #45baff66;
-    border-radius: 12px;
-    background: #071b35cc;
-    color: white;
-    font-size: 25px;
-    cursor: pointer;
-    backdrop-filter: blur(12px);
-    transition: .3s;
-}
-
-.menu-boton:hover {
-    background: #0875c9;
-    box-shadow: 0 0 18px #168bff88;
-}
-
-/* FONDO OSCURO DEL MENÚ */
+/* MENÚ LATERAL */
 
 .overlay {
     position: fixed;
@@ -220,8 +226,6 @@ header p {
     opacity: 1;
     visibility: visible;
 }
-
-/* PANEL LATERAL */
 
 .menu-lateral {
     position: fixed;
@@ -260,6 +264,7 @@ header p {
     letter-spacing: 2px;
     color: #75caff;
     margin-bottom: 5px;
+    padding-right: 20px;
 }
 
 .menu-subtitulo {
@@ -362,19 +367,37 @@ footer {
     color: #45baff;
 }
 
+/* RESPONSIVE */
+
 @media (max-width: 600px) {
+
+    .menu-boton {
+        top: 15px;
+        left: 15px;
+        width: 42px;
+        height: 42px;
+    }
+
     header {
-        top: 30px;
+        top: 17px;
+        left: 68px;
+        right: 10px;
+        text-align: center;
     }
 
     h1 {
-        font-size: 36px;
-        letter-spacing: 2px;
+        font-size: clamp(25px, 6vw, 36px);
+        letter-spacing: 1px;
     }
 
     header p {
-        font-size: 9px;
-        letter-spacing: 1.5px;
+        font-size: 8px;
+        letter-spacing: 1px;
+    }
+
+    .contenedor {
+        padding-top: 100px;
+        padding-bottom: 65px;
     }
 
     #tierra {
@@ -386,13 +409,6 @@ footer {
     .boton-iniciar {
         margin-top: 15px;
         padding: 13px 40px;
-    }
-
-    .menu-boton {
-        top: 15px;
-        left: 15px;
-        width: 42px;
-        height: 42px;
     }
 
     footer {
@@ -409,14 +425,13 @@ footer {
     }
 }
 
-@media (max-height: 650px) {
-    .contenedor {
-        padding-top: 75px;
-        padding-bottom: 55px;
-    }
+/* PANTALLAS BAJAS */
 
-    #tierra {
-        max-height: 43vh;
+@media (max-height: 650px) {
+
+    .contenedor {
+        padding-top: 85px;
+        padding-bottom: 55px;
     }
 
     header {
@@ -425,6 +440,10 @@ footer {
 
     h1 {
         font-size: 35px;
+    }
+
+    #tierra {
+        max-height: 40vh;
     }
 }
 
@@ -438,7 +457,7 @@ footer {
 
 <body>
 
-<!-- FONDO DE AURORAS -->
+<!-- FONDO AURORAS -->
 
 <div class="fondo-aurora">
     <div class="aurora aurora-1"></div>
@@ -456,11 +475,9 @@ footer {
     ☰
 </button>
 
-<!-- OSCURECER FONDO -->
-
 <div class="overlay" id="overlay"></div>
 
-<!-- MENÚ LATERAL -->
+<!-- PANEL LATERAL -->
 
 <aside class="menu-lateral" id="menuLateral">
 
@@ -468,14 +485,12 @@ footer {
             aria-label="Cerrar menú">×</button>
 
     <div class="menu-logo">LOS LATIDOS DE LA TIERRA</div>
-
     <p class="menu-subtitulo">PROYECTO TECNOLÓGICO</p>
 
     <div class="menu-linea"></div>
 
     <section class="menu-seccion">
         <h3>Sobre el proyecto</h3>
-
         <p>
             Los latidos de la Tierra es una experiencia interactiva
             diseñada para acercar a las personas al conocimiento
@@ -488,7 +503,6 @@ footer {
 
     <section class="menu-seccion">
         <h3>Objetivo</h3>
-
         <p>
             Crear una experiencia inclusiva que permita explorar
             y conocer nuestro planeta mediante estímulos auditivos
@@ -501,8 +515,6 @@ footer {
 
     <section class="menu-seccion">
         <h3>Información de contacto</h3>
-
-        <!-- PERSONALIZA ESTOS DATOS -->
 
         <a class="menu-enlace" href="mailto:TU_CORREO@ejemplo.com">
             <span class="menu-icono">✉</span>
@@ -521,14 +533,12 @@ footer {
             <span class="menu-icono">⌘</span>
             GitHub
         </a>
-
     </section>
 
     <div class="menu-linea"></div>
 
     <section class="menu-seccion">
         <h3>Acerca de</h3>
-
         <p>
             Una propuesta que combina tecnología, innovación
             y accesibilidad para descubrir las maravillas
@@ -538,7 +548,7 @@ footer {
 
 </aside>
 
-<!-- CONTENIDO PRINCIPAL -->
+<!-- CONTENIDO -->
 
 <div class="contenedor">
 
@@ -553,29 +563,19 @@ footer {
         <a href="main.html">INICIAR</a>
     </button>
 
-    <!-- FOOTER -->
-
     <footer>
         <div class="footer-contenido">
-
-            <span class="footer-nombre">
-                LOS LATIDOS DE LA TIERRA
-            </span>
-
+            <span class="footer-nombre">LOS LATIDOS DE LA TIERRA</span>
             <span class="footer-separador">|</span>
-
             <span>TECNOLOGÍA E INCLUSIÓN</span>
-
             <span class="footer-separador">|</span>
-
             <span>© 2026 TODOS LOS DERECHOS RESERVADOS</span>
-
         </div>
     </footer>
 
 </div>
 
-<!-- FUNCIONAMIENTO DEL MENÚ -->
+<!-- CONTROL DEL MENÚ -->
 
 <script>
 const abrirMenu = document.getElementById('abrirMenu');
@@ -600,28 +600,19 @@ cerrarMenu.addEventListener('click', cerrarPanel);
 overlay.addEventListener('click', cerrarPanel);
 
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        cerrarPanel();
-    }
+    if (e.key === 'Escape') cerrarPanel();
 });
 </script>
 
-<!-- THREE.JS: TIERRA 3D -->
+<!-- THREE.JS -->
 
 <script type="module">
 import * as THREE from 'https://esm.sh/three@0.160.1';
 
 const contenedor = document.getElementById('tierra');
-
 const escena = new THREE.Scene();
 
-const camara = new THREE.PerspectiveCamera(
-    45,
-    1,
-    0.1,
-    100
-);
-
+const camara = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
 camara.position.z = 3.4;
 
 const renderizador = new THREE.WebGLRenderer({
@@ -629,10 +620,7 @@ const renderizador = new THREE.WebGLRenderer({
     alpha: true
 });
 
-renderizador.setPixelRatio(
-    Math.min(window.devicePixelRatio, 2)
-);
-
+renderizador.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 contenedor.appendChild(renderizador.domElement);
 
 // ILUMINACIÓN
@@ -708,12 +696,11 @@ cargador.load(
 
         planetaGrupo.add(atmosfera);
 
-        // ESTRELLAS 3D
+        // ESTRELLAS
 
         const posiciones = [];
 
         for (let i = 0; i < 3000; i++) {
-
             const x = (Math.random() - 0.5) * 100;
             const y = (Math.random() - 0.5) * 100;
             const z = (Math.random() - 0.5) * 100;
@@ -745,7 +732,6 @@ cargador.load(
         // ANIMACIÓN
 
         function animar() {
-
             requestAnimationFrame(animar);
 
             planetaGrupo.rotation.y += 0.0012;
@@ -761,7 +747,6 @@ cargador.load(
 // AJUSTAR PANTALLA
 
 function ajustarPantalla() {
-
     const ancho = contenedor.clientWidth;
     const alto = contenedor.clientHeight;
 
