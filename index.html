@@ -9,520 +9,117 @@
 <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-html {
-    min-height: 100%;
-    scroll-behavior: smooth;
-}
-
-body {
-    min-height: 100vh;
-    overflow-x: hidden;
-    background: #020711;
-    color: white;
-    font-family: 'Montserrat', sans-serif;
-}
+*{margin:0;padding:0;box-sizing:border-box}
+html{min-height:100%;scroll-behavior:smooth}
+body{min-height:100vh;overflow-x:hidden;background:#020711;color:white;font-family:'Montserrat',sans-serif}
 
 /* FONDO ESPACIAL */
+.fondo-aurora{position:fixed;inset:0;overflow:hidden;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 50% 0%,#123b43 0%,transparent 55%),radial-gradient(ellipse at 15% 50%,#071b35 0%,transparent 60%),#020711}
+.aurora{position:absolute;width:150%;height:75%;top:-15%;left:-25%;filter:blur(45px);opacity:.5;animation:movimientoAurora 14s ease-in-out infinite alternate}
+.aurora-1{background:linear-gradient(115deg,transparent 15%,#00ff9d55 30%,#00e5a055 42%,#00aaff44 55%,transparent 75%)}
+.aurora-2{background:linear-gradient(75deg,transparent 20%,#00ffcc55 35%,#42ff7655 48%,#8c52ff55 62%,transparent 80%);animation-duration:19s;opacity:.4}
+.aurora-3{background:linear-gradient(100deg,transparent 25%,#00bfff44 38%,#00ff9955 50%,#b000ff44 65%,transparent 85%);animation-duration:23s;opacity:.35}
+@keyframes movimientoAurora{0%{transform:translateX(-5%) translateY(0) rotate(-8deg) scaleY(.8)}100%{transform:translateX(8%) translateY(-3%) rotate(-4deg) scaleY(.9)}}
+.estrellas-fondo{position:absolute;inset:0;background-image:radial-gradient(2px 2px at 20% 30%,white 80%,transparent),radial-gradient(1px 1px at 70% 20%,white 80%,transparent),radial-gradient(2px 2px at 85% 60%,white 80%,transparent),radial-gradient(1px 1px at 40% 75%,white 80%,transparent),radial-gradient(2px 2px at 10% 85%,white 80%,transparent);background-size:350px 350px;opacity:.5}
 
-.fondo-aurora {
-    position: fixed;
-    inset: 0;
-    overflow: hidden;
-    z-index: 0;
-    pointer-events: none;
-    background:
-        radial-gradient(ellipse at 50% 0%, #123b43 0%, transparent 55%),
-        radial-gradient(ellipse at 15% 50%, #071b35 0%, transparent 60%),
-        #020711;
-}
+/* CONTROLES SUPERIORES */
+.menu-boton{position:fixed;top:22px;left:22px;z-index:20;width:46px;height:46px;border:1px solid #45baff66;border-radius:12px;background:#071b35dd;color:white;font-size:24px;cursor:pointer;backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;transition:.3s}
+.menu-boton:hover{background:#0875c9;box-shadow:0 0 18px #168bff88}
 
-.aurora {
-    position: absolute;
-    width: 150%;
-    height: 75%;
-    top: -15%;
-    left: -25%;
-    filter: blur(45px);
-    opacity: .5;
-    animation: movimientoAurora 14s ease-in-out infinite alternate;
-}
-
-.aurora-1 {
-    background: linear-gradient(115deg,
-        transparent 15%, #00ff9d55 30%,
-        #00e5a055 42%, #00aaff44 55%,
-        transparent 75%);
-}
-
-.aurora-2 {
-    background: linear-gradient(75deg,
-        transparent 20%, #00ffcc55 35%,
-        #42ff7655 48%, #8c52ff55 62%,
-        transparent 80%);
-    animation-duration: 19s;
-    opacity: .4;
-}
-
-.aurora-3 {
-    background: linear-gradient(100deg,
-        transparent 25%, #00bfff44 38%,
-        #00ff9955 50%, #b000ff44 65%,
-        transparent 85%);
-    animation-duration: 23s;
-    opacity: .35;
-}
-
-@keyframes movimientoAurora {
-    0% {
-        transform: translateX(-5%) translateY(0) rotate(-8deg) scaleY(.8);
-    }
-    100% {
-        transform: translateX(8%) translateY(-3%) rotate(-4deg) scaleY(.9);
-    }
-}
-
-.estrellas-fondo {
-    position: absolute;
-    inset: 0;
-    background-image:
-        radial-gradient(2px 2px at 20% 30%, white 80%, transparent),
-        radial-gradient(1px 1px at 70% 20%, white 80%, transparent),
-        radial-gradient(2px 2px at 85% 60%, white 80%, transparent),
-        radial-gradient(1px 1px at 40% 75%, white 80%, transparent),
-        radial-gradient(2px 2px at 10% 85%, white 80%, transparent);
-    background-size: 350px 350px;
-    opacity: .5;
-}
-
-/* MENÚ SUPERIOR */
-
-.menu-boton {
-    position: fixed;
-    top: 22px;
-    left: 22px;
-    z-index: 20;
-    width: 46px;
-    height: 46px;
-    border: 1px solid #45baff66;
-    border-radius: 12px;
-    background: #071b35dd;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-    backdrop-filter: blur(12px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: .3s;
-}
-
-.menu-boton:hover {
-    background: #0875c9;
-    box-shadow: 0 0 18px #168bff88;
-}
+.idiomas{position:fixed;top:22px;right:22px;z-index:20;display:flex;gap:4px;padding:5px;background:#071b35dd;border:1px solid #45baff66;border-radius:12px;backdrop-filter:blur(12px)}
+.idioma-btn{border:0;border-radius:8px;padding:9px 12px;background:transparent;color:#a9c7df;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:.25s}
+.idioma-btn:hover{color:white;background:#168bff44}
+.idioma-btn.activo{background:#0875c9;color:white;box-shadow:0 0 12px #168bff66}
 
 /* TÍTULO */
-
-header {
-    position: absolute;
-    top: 22px;
-    left: 0;
-    width: 100%;
-    padding: 0 85px;
-    text-align: center;
-    z-index: 2;
-    pointer-events: none;
-}
-
-header h1 {
-    font-family: 'Teko', sans-serif;
-    font-size: clamp(35px, 5vw, 65px);
-    letter-spacing: 4px;
-    color: white;
-    text-shadow: 0 0 18px #168bff;
-    line-height: 1.1;
-}
-
-header p {
-    font-size: clamp(9px, 1.5vw, 13px);
-    letter-spacing: 3px;
-    color: #a9d9ff;
-    margin-top: 3px;
-}
+header{position:absolute;top:22px;left:0;width:100%;padding:0 150px;text-align:center;z-index:2;pointer-events:none}
+header h1{font-family:'Teko',sans-serif;font-size:clamp(35px,5vw,65px);letter-spacing:4px;color:white;text-shadow:0 0 18px #168bff;line-height:1.1}
+header p{font-size:clamp(9px,1.5vw,13px);letter-spacing:3px;color:#a9d9ff;margin-top:3px}
 
 /* CONTENIDO */
-
-.contenedor {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 135px 20px 35px;
-}
+.contenedor{position:relative;z-index:1;width:100%;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:135px 20px 35px}
 
 /* TIERRA */
-
-#tierra {
-    width: min(65vw, 520px);
-    height: min(65vw, 520px);
-    max-height: 55vh;
-    position: relative;
-    flex-shrink: 0;
-}
-
-#tierra canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-}
+#tierra{width:min(65vw,520px);height:min(65vw,520px);max-height:55vh;position:relative;flex-shrink:0}
+#tierra canvas{display:block;width:100%;height:100%}
 
 /* BOTÓN INICIAR */
-
-.boton-iniciar {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 15px;
-    padding: 15px 55px;
-    border: 1px solid #45baff;
-    border-radius: 40px;
-    background: linear-gradient(135deg, #0875c9, #003b78);
-    color: white;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 4px;
-    cursor: pointer;
-    box-shadow: 0 0 15px #087bdc;
-    transition: .3s ease;
-    text-decoration: none;
-}
-
-.boton-iniciar:hover {
-    transform: scale(1.07);
-    box-shadow: 0 0 30px #159dff;
-}
+.boton-iniciar{display:inline-flex;align-items:center;justify-content:center;margin-top:15px;padding:15px 55px;border:1px solid #45baff;border-radius:40px;background:linear-gradient(135deg,#0875c9,#003b78);color:white;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:600;letter-spacing:4px;cursor:pointer;box-shadow:0 0 15px #087bdc;transition:.3s ease;text-decoration:none}
+.boton-iniciar:hover{transform:scale(1.07);box-shadow:0 0 30px #159dff}
 
 /* FOOTER */
-
-footer {
-    position: relative;
-    z-index: 5;
-    width: 100%;
-    padding: 20px 15px;
-    background: linear-gradient(90deg, #020711ee, #09213bee, #020711ee);
-    border-top: 1px solid #45baff33;
-    backdrop-filter: blur(12px);
-}
-
-.footer-contenido {
-    max-width: 1100px;
-    margin: auto;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 8px 15px;
-    text-align: center;
-    color: #9ebbd5;
-    font-size: 10px;
-    line-height: 1.7;
-    letter-spacing: 1px;
-}
-
-.footer-nombre {
-    color: #70c7ff;
-    font-weight: 700;
-}
+footer{position:relative;z-index:5;width:100%;padding:20px 15px;background:linear-gradient(90deg,#020711ee,#09213bee,#020711ee);border-top:1px solid #45baff33;backdrop-filter:blur(12px)}
+.footer-contenido{max-width:1100px;margin:auto;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px 15px;text-align:center;color:#9ebbd5;font-size:10px;line-height:1.7;letter-spacing:1px}
+.footer-nombre{color:#70c7ff;font-weight:700}
 
 /* OVERLAY */
-
-.overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 29;
-    background: #000a;
-    backdrop-filter: blur(3px);
-    opacity: 0;
-    visibility: hidden;
-    transition: .3s;
-}
-
-.overlay.activo {
-    opacity: 1;
-    visibility: visible;
-}
+.overlay{position:fixed;inset:0;z-index:29;background:#000a;backdrop-filter:blur(3px);opacity:0;visibility:hidden;transition:.3s}
+.overlay.activo{opacity:1;visibility:visible}
 
 /* MENÚ LATERAL */
-
-.menu-lateral {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: min(370px, 88%);
-    height: 100vh;
-    height: 100dvh;
-    z-index: 30;
-    padding: 35px 25px 45px;
-    background: linear-gradient(160deg, #071b35f7, #020711fc);
-    border-right: 1px solid #45baff55;
-    backdrop-filter: blur(20px);
-    transform: translateX(-105%);
-    transition: transform .4s ease;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-}
-
-.menu-lateral.activo {
-    transform: translateX(0);
-}
-
-.cerrar-menu {
-    position: absolute;
-    right: 20px;
-    top: 15px;
-    width: 35px;
-    height: 35px;
-    background: transparent;
-    color: white;
-    border: none;
-    font-size: 30px;
-    cursor: pointer;
-}
-
-.menu-logo {
-    font-family: 'Teko', sans-serif;
-    font-size: 30px;
-    letter-spacing: 2px;
-    line-height: 1.2;
-    color: #75caff;
-    padding-right: 25px;
-}
-
-.menu-subtitulo {
-    color: #9dbbd3;
-    font-size: 10px;
-    letter-spacing: 2px;
-    margin-top: 5px;
-    margin-bottom: 25px;
-}
-
-.menu-seccion {
-    margin-bottom: 25px;
-}
-
-.menu-seccion h3 {
-    font-size: 12px;
-    color: #58baff;
-    letter-spacing: 2px;
-    margin-bottom: 12px;
-    text-transform: uppercase;
-}
-
-.menu-seccion p {
-    font-size: 12px;
-    line-height: 1.9;
-    color: #c2d5e8;
-    overflow-wrap: anywhere;
-}
-
-.menu-enlace {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: #d9ecff;
-    text-decoration: none;
-    font-size: 12px;
-    margin: 15px 0;
-    transition: .3s;
-    overflow-wrap: anywhere;
-    word-break: break-word;
-}
-
-.menu-enlace:hover {
-    color: #48baff;
-    transform: translateX(5px);
-}
-
-.menu-icono {
-    width: 34px;
-    height: 34px;
-    flex-shrink: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 9px;
-    background: #168bff22;
-    border: 1px solid #168bff55;
-    font-size: 15px;
-}
-
-.menu-linea {
-    width: 100%;
-    height: 1px;
-    background: #45baff33;
-    margin: 23px 0;
-}
+.menu-lateral{position:fixed;top:0;left:0;width:min(370px,88%);height:100vh;height:100dvh;z-index:30;padding:35px 25px 45px;background:linear-gradient(160deg,#071b35f7,#020711fc);border-right:1px solid #45baff55;backdrop-filter:blur(20px);transform:translateX(-105%);transition:transform .4s ease;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.menu-lateral.activo{transform:translateX(0)}
+.cerrar-menu{position:absolute;right:20px;top:15px;width:35px;height:35px;background:transparent;color:white;border:none;font-size:30px;cursor:pointer}
+.menu-logo{font-family:'Teko',sans-serif;font-size:30px;letter-spacing:2px;line-height:1.2;color:#75caff;padding-right:25px}
+.menu-subtitulo{color:#9dbbd3;font-size:10px;letter-spacing:2px;margin-top:5px;margin-bottom:25px}
+.menu-seccion{margin-bottom:25px}
+.menu-seccion h3{font-size:12px;color:#58baff;letter-spacing:2px;margin-bottom:12px;text-transform:uppercase}
+.menu-seccion p{font-size:12px;line-height:1.9;color:#c2d5e8;overflow-wrap:anywhere}
+.menu-enlace{display:flex;align-items:center;gap:12px;color:#d9ecff;text-decoration:none;font-size:12px;margin:15px 0;transition:.3s;overflow-wrap:anywhere;word-break:break-word}
+.menu-enlace:hover{color:#48baff;transform:translateX(5px)}
+.menu-icono{width:34px;height:34px;flex-shrink:0;display:flex;justify-content:center;align-items:center;border-radius:9px;background:#168bff22;border:1px solid #168bff55;font-size:15px}
+.menu-linea{width:100%;height:1px;background:#45baff33;margin:23px 0}
 
 /* TABLETS */
-
-@media (max-width: 900px) {
-    #tierra {
-        width: min(75vw, 480px);
-        height: min(75vw, 480px);
-    }
-
-    header h1 {
-        letter-spacing: 2px;
-    }
+@media(max-width:900px){
+#tierra{width:min(75vw,480px);height:min(75vw,480px)}
+header h1{letter-spacing:2px}
 }
 
 /* CELULARES */
-
-@media (max-width: 600px) {
-
-    .menu-boton {
-        top: 14px;
-        left: 14px;
-        width: 42px;
-        height: 42px;
-    }
-
-    header {
-        top: 17px;
-        padding: 0 60px;
-    }
-
-    header h1 {
-        font-size: clamp(23px, 6vw, 35px);
-        letter-spacing: 1px;
-    }
-
-    header p {
-        font-size: 8px;
-        letter-spacing: 1px;
-    }
-
-    .contenedor {
-        min-height: 100svh;
-        padding: 115px 12px 40px;
-    }
-
-    #tierra {
-        width: min(88vw, 420px);
-        height: min(88vw, 420px);
-        max-height: 48vh;
-    }
-
-    .boton-iniciar {
-        margin-top: 12px;
-        padding: 13px 42px;
-        font-size: 12px;
-    }
-
-    footer {
-        padding: 17px 12px;
-    }
-
-    .footer-contenido {
-        flex-direction: column;
-        gap: 5px;
-        font-size: 9px;
-    }
-
-    .footer-separador {
-        display: none;
-    }
-
-    .menu-lateral {
-        width: min(350px, 90%);
-        padding: 30px 22px 40px;
-    }
+@media(max-width:600px){
+.menu-boton{top:14px;left:14px;width:42px;height:42px}
+.idiomas{top:14px;right:14px}
+.idioma-btn{padding:9px 9px;font-size:10px}
+header{top:75px;padding:0 15px}
+header h1{font-size:clamp(23px,6vw,35px);letter-spacing:1px}
+header p{font-size:8px;letter-spacing:1px}
+.contenedor{min-height:100svh;padding:145px 12px 40px}
+#tierra{width:min(88vw,420px);height:min(88vw,420px);max-height:48vh}
+.boton-iniciar{margin-top:12px;padding:13px 42px;font-size:12px}
+footer{padding:17px 12px}
+.footer-contenido{flex-direction:column;gap:5px;font-size:9px}
+.footer-separador{display:none}
+.menu-lateral{width:min(350px,90%);padding:30px 22px 40px}
 }
 
 /* PANTALLAS MUY PEQUEÑAS */
-
-@media (max-width: 360px) {
-
-    header {
-        padding: 0 55px;
-    }
-
-    header h1 {
-        font-size: 22px;
-    }
-
-    header p {
-        font-size: 7px;
-    }
-
-    #tierra {
-        width: 85vw;
-        height: 85vw;
-    }
-
-    .menu-logo {
-        font-size: 26px;
-    }
+@media(max-width:360px){
+header{padding:0 10px}
+header h1{font-size:22px}
+header p{font-size:7px}
+#tierra{width:85vw;height:85vw}
+.menu-logo{font-size:26px}
 }
 
 /* PANTALLAS BAJAS */
-
-@media (max-height: 650px) and (min-width: 601px) {
-
-    .contenedor {
-        padding-top: 100px;
-        padding-bottom: 25px;
-    }
-
-    header {
-        top: 10px;
-    }
-
-    header h1 {
-        font-size: 38px;
-    }
-
-    #tierra {
-        width: min(45vh, 380px);
-        height: min(45vh, 380px);
-        max-height: 45vh;
-    }
-
-    .boton-iniciar {
-        margin-top: 8px;
-    }
+@media(max-height:650px) and (min-width:601px){
+.contenedor{padding-top:100px;padding-bottom:25px}
+header{top:10px}
+header h1{font-size:38px}
+#tierra{width:min(45vh,380px);height:min(45vh,380px);max-height:45vh}
+.boton-iniciar{margin-top:8px}
 }
 
 /* MOVIMIENTO REDUCIDO */
-
-@media (prefers-reduced-motion: reduce) {
-    .aurora {
-        animation: none;
-    }
-
-    * {
-        scroll-behavior: auto !important;
-        transition-duration: .01ms !important;
-    }
+@media(prefers-reduced-motion:reduce){
+.aurora{animation:none}
+*{scroll-behavior:auto!important;transition-duration:.01ms!important}
 }
 </style>
 </head>
 
 <body>
-
-<!-- FONDO -->
 
 <div class="fondo-aurora">
     <div class="aurora aurora-1"></div>
@@ -532,66 +129,54 @@ footer {
 </div>
 
 <!-- BOTÓN MENÚ -->
+<button class="menu-boton" id="abrirMenu" aria-label="Abrir menú" aria-expanded="false">☰</button>
 
-<button class="menu-boton"
-        id="abrirMenu"
-        aria-label="Abrir menú"
-        aria-expanded="false">
-    ☰
-</button>
+<!-- SELECTOR DE IDIOMA -->
+<div class="idiomas" aria-label="Language selector">
+    <button class="idioma-btn activo" id="btnES" data-lang="es">ES</button>
+    <button class="idioma-btn" id="btnEN" data-lang="en">EN</button>
+</div>
 
 <div class="overlay" id="overlay"></div>
 
-<!-- MENÚ LATERAL COMPLETO -->
-
+<!-- MENÚ LATERAL -->
 <aside class="menu-lateral" id="menuLateral">
+    <button class="cerrar-menu" id="cerrarMenu" aria-label="Cerrar menú">×</button>
 
-    <button class="cerrar-menu" id="cerrarMenu"
-            aria-label="Cerrar menú">×</button>
-
-    <div class="menu-logo">LOS LATIDOS DE LA TIERRA</div>
-    <p class="menu-subtitulo">PROYECTO TECNOLÓGICO</p>
+    <div class="menu-logo" data-i18n="menuLogo">LOS LATIDOS DE LA TIERRA</div>
+    <p class="menu-subtitulo" data-i18n="menuSubtitle">PROYECTO TECNOLÓGICO</p>
 
     <div class="menu-linea"></div>
 
     <section class="menu-seccion">
-        <h3>Sobre el proyecto</h3>
-        <p>
-            Los latidos de la Tierra es una experiencia interactiva
-            que busca acercar a las personas al conocimiento de
-            nuestro planeta mediante tecnología, sonidos y recursos
-            digitales accesibles.
+        <h3 data-i18n="aboutTitle">Sobre el proyecto</h3>
+        <p data-i18n="aboutText">
+            Los latidos de la Tierra es una experiencia interactiva que busca acercar a las personas al conocimiento de nuestro planeta mediante tecnología, sonidos y recursos digitales accesibles.
         </p>
     </section>
 
     <div class="menu-linea"></div>
 
     <section class="menu-seccion">
-        <h3>Objetivo del proyecto</h3>
-        <p>
-            Desarrollar una experiencia inclusiva que permita explorar
-            y conocer nuestro planeta mediante estímulos auditivos
-            y elementos interactivos, especialmente pensada para
-            personas con discapacidad visual.
+        <h3 data-i18n="objectiveTitle">Objetivo del proyecto</h3>
+        <p data-i18n="objectiveText">
+            Desarrollar una experiencia inclusiva que permita explorar y conocer nuestro planeta mediante estímulos auditivos y elementos interactivos, especialmente pensada para personas con discapacidad visual.
         </p>
     </section>
 
     <div class="menu-linea"></div>
 
     <section class="menu-seccion">
-        <h3>¿Qué encontrarás?</h3>
-        <p>
-            Una representación interactiva de la Tierra, sonidos
-            ambientales y contenido diseñado para ofrecer una
-            experiencia de exploración diferente, combinando
-            tecnología, naturaleza y accesibilidad.
+        <h3 data-i18n="featuresTitle">¿Qué encontrarás?</h3>
+        <p data-i18n="featuresText">
+            Una representación interactiva de la Tierra, sonidos ambientales y contenido diseñado para ofrecer una experiencia de exploración diferente, combinando tecnología, naturaleza y accesibilidad.
         </p>
     </section>
 
     <div class="menu-linea"></div>
 
     <section class="menu-seccion">
-        <h3>Información de contacto</h3>
+        <h3 data-i18n="contactTitle">Información de contacto</h3>
 
         <a class="menu-enlace" href="mailto:TU_CORREO@ejemplo.com">
             <span class="menu-icono">✉</span>
@@ -603,10 +188,7 @@ footer {
             <span>+52 000 000 0000</span>
         </a>
 
-        <a class="menu-enlace"
-           href="https://github.com/"
-           target="_blank"
-           rel="noopener noreferrer">
+        <a class="menu-enlace" href="https://github.com/" target="_blank" rel="noopener noreferrer">
             <span class="menu-icono">⌘</span>
             <span>GitHub</span>
         </a>
@@ -615,134 +197,205 @@ footer {
     <div class="menu-linea"></div>
 
     <section class="menu-seccion">
-        <h3>Acerca de</h3>
-        <p>
-            Este proyecto representa una propuesta de innovación
-            tecnológica enfocada en la inclusión y la accesibilidad.
-            Su propósito es demostrar cómo las herramientas digitales
-            pueden convertirse en medios para aprender, experimentar
-            y descubrir el mundo de una manera diferente.
+        <h3 data-i18n="aboutUsTitle">Acerca de</h3>
+        <p data-i18n="aboutUsText">
+            Este proyecto representa una propuesta de innovación tecnológica enfocada en la inclusión y la accesibilidad. Su propósito es demostrar cómo las herramientas digitales pueden convertirse en medios para aprender, experimentar y descubrir el mundo de una manera diferente.
         </p>
     </section>
 
     <div class="menu-linea"></div>
 
     <section class="menu-seccion">
-        <h3>Desarrollo del proyecto</h3>
-        <p>
-            Una propuesta que combina diseño web, visualización
-            tridimensional, recursos multimedia y principios de
-            accesibilidad para crear una experiencia educativa.
+        <h3 data-i18n="developmentTitle">Desarrollo del proyecto</h3>
+        <p data-i18n="developmentText">
+            Una propuesta que combina diseño web, visualización tridimensional, recursos multimedia y principios de accesibilidad para crear una experiencia educativa.
         </p>
     </section>
 
     <div class="menu-linea"></div>
 
     <section class="menu-seccion">
-        <h3>Gracias por visitarnos</h3>
-        <p>
+        <h3 data-i18n="thanksTitle">Gracias por visitarnos</h3>
+        <p data-i18n="thanksText">
             Explora, escucha y descubre los latidos de nuestro planeta.
         </p>
     </section>
-
 </aside>
 
 <!-- CONTENIDO PRINCIPAL -->
-
 <main class="contenedor">
 
     <header>
-        <h1>LOS LATIDOS DE LA TIERRA</h1>
-        <p>UN PLANETA, MILLONES DE HISTORIAS</p>
+        <h1 data-i18n="mainTitle">LOS LATIDOS DE LA TIERRA</h1>
+        <p data-i18n="mainSubtitle">UN PLANETA, MILLONES DE HISTORIAS</p>
     </header>
 
     <div id="tierra"></div>
 
-    <a href="aurora.html" class="boton-iniciar">
-        INICIAR
-    </a>
+    <a href="aurora.html" class="boton-iniciar" data-i18n="startButton">INICIAR</a>
 
 </main>
 
 <!-- FOOTER -->
-
 <footer>
     <div class="footer-contenido">
-        <span class="footer-nombre">
-            LOS LATIDOS DE LA TIERRA
-        </span>
-
+        <span class="footer-nombre" data-i18n="footerName">LOS LATIDOS DE LA TIERRA</span>
         <span class="footer-separador">|</span>
-
-        <span>TECNOLOGÍA E INCLUSIÓN</span>
-
+        <span data-i18n="footerTheme">TECNOLOGÍA E INCLUSIÓN</span>
         <span class="footer-separador">|</span>
-
-        <span>© 2026 TODOS LOS DERECHOS RESERVADOS</span>
+        <span data-i18n="footerRights">© 2026 TODOS LOS DERECHOS RESERVADOS</span>
     </div>
 </footer>
 
-<!-- FUNCIONAMIENTO DEL MENÚ -->
-
+<!-- MENÚ Y TRADUCCIÓN -->
 <script>
 const abrirMenu = document.getElementById('abrirMenu');
 const cerrarMenu = document.getElementById('cerrarMenu');
 const menuLateral = document.getElementById('menuLateral');
 const overlay = document.getElementById('overlay');
 
-function abrirPanel() {
+function abrirPanel(){
     menuLateral.classList.add('activo');
     overlay.classList.add('activo');
-    abrirMenu.setAttribute('aria-expanded', 'true');
+    abrirMenu.setAttribute('aria-expanded','true');
 }
 
-function cerrarPanel() {
+function cerrarPanel(){
     menuLateral.classList.remove('activo');
     overlay.classList.remove('activo');
-    abrirMenu.setAttribute('aria-expanded', 'false');
+    abrirMenu.setAttribute('aria-expanded','false');
 }
 
-abrirMenu.addEventListener('click', abrirPanel);
-cerrarMenu.addEventListener('click', cerrarPanel);
-overlay.addEventListener('click', cerrarPanel);
+abrirMenu.addEventListener('click',abrirPanel);
+cerrarMenu.addEventListener('click',cerrarPanel);
+overlay.addEventListener('click',cerrarPanel);
 
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        cerrarPanel();
-    }
+document.addEventListener('keydown',(e)=>{
+    if(e.key==='Escape') cerrarPanel();
 });
+
+/* DICCIONARIO DE IDIOMAS */
+const traducciones = {
+    es:{
+        menuLogo:"LOS LATIDOS DE LA TIERRA",
+        menuSubtitle:"PROYECTO TECNOLÓGICO",
+        aboutTitle:"Sobre el proyecto",
+        aboutText:"Los latidos de la Tierra es una experiencia interactiva que busca acercar a las personas al conocimiento de nuestro planeta mediante tecnología, sonidos y recursos digitales accesibles.",
+        objectiveTitle:"Objetivo del proyecto",
+        objectiveText:"Desarrollar una experiencia inclusiva que permita explorar y conocer nuestro planeta mediante estímulos auditivos y elementos interactivos, especialmente pensada para personas con discapacidad visual.",
+        featuresTitle:"¿Qué encontrarás?",
+        featuresText:"Una representación interactiva de la Tierra, sonidos ambientales y contenido diseñado para ofrecer una experiencia de exploración diferente, combinando tecnología, naturaleza y accesibilidad.",
+        contactTitle:"Información de contacto",
+        aboutUsTitle:"Acerca de",
+        aboutUsText:"Este proyecto representa una propuesta de innovación tecnológica enfocada en la inclusión y la accesibilidad. Su propósito es demostrar cómo las herramientas digitales pueden convertirse en medios para aprender, experimentar y descubrir el mundo de una manera diferente.",
+        developmentTitle:"Desarrollo del proyecto",
+        developmentText:"Una propuesta que combina diseño web, visualización tridimensional, recursos multimedia y principios de accesibilidad para crear una experiencia educativa.",
+        thanksTitle:"Gracias por visitarnos",
+        thanksText:"Explora, escucha y descubre los latidos de nuestro planeta.",
+        mainTitle:"LOS LATIDOS DE LA TIERRA",
+        mainSubtitle:"UN PLANETA, MILLONES DE HISTORIAS",
+        startButton:"INICIAR",
+        footerName:"LOS LATIDOS DE LA TIERRA",
+        footerTheme:"TECNOLOGÍA E INCLUSIÓN",
+        footerRights:"© 2026 TODOS LOS DERECHOS RESERVADOS",
+        openMenu:"Abrir menú",
+        closeMenu:"Cerrar menú"
+    },
+    en:{
+        menuLogo:"THE HEARTBEATS OF EARTH",
+        menuSubtitle:"TECHNOLOGICAL PROJECT",
+        aboutTitle:"About the project",
+        aboutText:"The Heartbeats of Earth is an interactive experience designed to bring people closer to understanding our planet through technology, sounds, and accessible digital resources.",
+        objectiveTitle:"Project objective",
+        objectiveText:"To develop an inclusive experience that allows people to explore and learn about our planet through auditory stimuli and interactive elements, especially designed for people with visual disabilities.",
+        featuresTitle:"What will you find?",
+        featuresText:"An interactive representation of Earth, environmental sounds, and content designed to offer a different exploration experience by combining technology, nature, and accessibility.",
+        contactTitle:"Contact information",
+        aboutUsTitle:"About us",
+        aboutUsText:"This project represents a technological innovation proposal focused on inclusion and accessibility. Its purpose is to demonstrate how digital tools can become a way to learn, experience, and discover the world differently.",
+        developmentTitle:"Project development",
+        developmentText:"A proposal that combines web design, three-dimensional visualization, multimedia resources, and accessibility principles to create an educational experience.",
+        thanksTitle:"Thank you for visiting",
+        thanksText:"Explore, listen, and discover the heartbeats of our planet.",
+        mainTitle:"THE HEARTBEATS OF EARTH",
+        mainSubtitle:"ONE PLANET, MILLIONS OF STORIES",
+        startButton:"START",
+        footerName:"THE HEARTBEATS OF EARTH",
+        footerTheme:"TECHNOLOGY AND INCLUSION",
+        footerRights:"© 2026 ALL RIGHTS RESERVED",
+        openMenu:"Open menu",
+        closeMenu:"Close menu"
+    }
+};
+
+function cambiarIdioma(idioma){
+    const textos = traducciones[idioma];
+    if(!textos) return;
+
+    document.documentElement.lang = idioma;
+    document.title = idioma === 'es'
+        ? 'Los latidos de la Tierra'
+        : 'The Heartbeats of Earth';
+
+    document.querySelectorAll('[data-i18n]').forEach(elemento=>{
+        const clave = elemento.dataset.i18n;
+        if(textos[clave]){
+            elemento.textContent = textos[clave];
+        }
+    });
+
+    abrirMenu.setAttribute('aria-label',textos.openMenu);
+    cerrarMenu.setAttribute('aria-label',textos.closeMenu);
+
+    document.getElementById('btnES').classList.toggle('activo',idioma==='es');
+    document.getElementById('btnEN').classList.toggle('activo',idioma==='en');
+
+    try{
+        localStorage.setItem('idiomaTierra',idioma);
+    }catch(error){
+        console.warn('No se pudo guardar el idioma:',error);
+    }
+}
+
+document.getElementById('btnES').addEventListener('click',()=>cambiarIdioma('es'));
+document.getElementById('btnEN').addEventListener('click',()=>cambiarIdioma('en'));
+
+let idiomaGuardado = 'es';
+try{
+    idiomaGuardado = localStorage.getItem('idiomaTierra') || 'es';
+}catch(error){
+    idiomaGuardado = 'es';
+}
+
+cambiarIdioma(idiomaGuardado);
 </script>
 
 <!-- THREE.JS: TIERRA 3D -->
-
 <script type="module">
 import * as THREE from 'https://esm.sh/three@0.160.1';
 
 const contenedor = document.getElementById('tierra');
-
 const escena = new THREE.Scene();
 
-const camara = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+const camara = new THREE.PerspectiveCamera(45,1,0.1,100);
 camara.position.z = 3.4;
 
 const renderizador = new THREE.WebGLRenderer({
-    antialias: true,
-    alpha: true
+    antialias:true,
+    alpha:true
 });
 
-renderizador.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderizador.setPixelRatio(Math.min(window.devicePixelRatio,2));
 contenedor.appendChild(renderizador.domElement);
 
-// ILUMINACIÓN
+/* ILUMINACIÓN */
+escena.add(new THREE.AmbientLight(0xffffff,0.65));
 
-escena.add(new THREE.AmbientLight(0xffffff, 0.65));
-
-const luzSolar = new THREE.DirectionalLight(0xffffff, 2.8);
-luzSolar.position.set(-4, 2, 5);
+const luzSolar = new THREE.DirectionalLight(0xffffff,2.8);
+luzSolar.position.set(-4,2,5);
 escena.add(luzSolar);
 
-// GRUPO DE LA TIERRA
-
+/* GRUPO DE LA TIERRA */
 const planetaGrupo = new THREE.Group();
 escena.add(planetaGrupo);
 
@@ -750,40 +403,39 @@ const cargador = new THREE.TextureLoader();
 
 cargador.load(
     'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
-    (textura) => {
+    (textura)=>{
 
         textura.colorSpace = THREE.SRGBColorSpace;
 
-        const geometria = new THREE.SphereGeometry(1, 128, 128);
+        const geometria = new THREE.SphereGeometry(1,128,128);
 
         const material = new THREE.MeshPhongMaterial({
-            map: textura,
-            shininess: 18,
-            specular: new THREE.Color(0x333333)
+            map:textura,
+            shininess:18,
+            specular:new THREE.Color(0x333333)
         });
 
-        const tierra = new THREE.Mesh(geometria, material);
+        const tierra = new THREE.Mesh(geometria,material);
         planetaGrupo.add(tierra);
 
-        // NUBES
-
+        /* NUBES */
         cargador.load(
             'https://threejs.org/examples/textures/planets/earth_clouds_1024.png',
-            (texturaNubes) => {
+            (texturaNubes)=>{
 
                 const nubes = new THREE.Mesh(
-                    new THREE.SphereGeometry(1.008, 128, 128),
+                    new THREE.SphereGeometry(1.008,128,128),
                     new THREE.MeshPhongMaterial({
-                        map: texturaNubes,
-                        transparent: true,
-                        opacity: 0.35,
-                        depthWrite: false
+                        map:texturaNubes,
+                        transparent:true,
+                        opacity:0.35,
+                        depthWrite:false
                     })
                 );
 
                 planetaGrupo.add(nubes);
 
-                function girarNubes() {
+                function girarNubes(){
                     nubes.rotation.y += 0.00035;
                     requestAnimationFrame(girarNubes);
                 }
@@ -792,31 +444,29 @@ cargador.load(
             }
         );
 
-        // ATMÓSFERA
-
+        /* ATMÓSFERA */
         const atmosfera = new THREE.Mesh(
-            new THREE.SphereGeometry(1.045, 128, 128),
+            new THREE.SphereGeometry(1.045,128,128),
             new THREE.MeshBasicMaterial({
-                color: 0x168bff,
-                transparent: true,
-                opacity: 0.13,
-                side: THREE.BackSide
+                color:0x168bff,
+                transparent:true,
+                opacity:0.13,
+                side:THREE.BackSide
             })
         );
 
         planetaGrupo.add(atmosfera);
 
-        // ESTRELLAS 3D
-
+        /* ESTRELLAS 3D */
         const posiciones = [];
 
-        for (let i = 0; i < 3000; i++) {
-            const x = (Math.random() - 0.5) * 100;
-            const y = (Math.random() - 0.5) * 100;
-            const z = (Math.random() - 0.5) * 100;
+        for(let i=0;i<3000;i++){
+            const x = (Math.random()-0.5)*100;
+            const y = (Math.random()-0.5)*100;
+            const z = (Math.random()-0.5)*100;
 
-            if (Math.sqrt(x*x + y*y + z*z) > 5) {
-                posiciones.push(x, y, z);
+            if(Math.sqrt(x*x+y*y+z*z)>5){
+                posiciones.push(x,y,z);
             }
         }
 
@@ -824,59 +474,56 @@ cargador.load(
 
         geometriaEstrellas.setAttribute(
             'position',
-            new THREE.Float32BufferAttribute(posiciones, 3)
+            new THREE.Float32BufferAttribute(posiciones,3)
         );
 
         const estrellas = new THREE.Points(
             geometriaEstrellas,
             new THREE.PointsMaterial({
-                color: 0xffffff,
-                size: 0.035,
-                transparent: true,
-                opacity: 0.8
+                color:0xffffff,
+                size:0.035,
+                transparent:true,
+                opacity:0.8
             })
         );
 
         escena.add(estrellas);
 
-        // ANIMACIÓN
-
-        function animar() {
+        /* ANIMACIÓN */
+        function animar(){
             requestAnimationFrame(animar);
 
             planetaGrupo.rotation.y += 0.0012;
             estrellas.rotation.y += 0.00004;
 
-            renderizador.render(escena, camara);
+            renderizador.render(escena,camara);
         }
 
         animar();
     },
     undefined,
-    (error) => {
-        console.error('No se pudo cargar la textura de la Tierra:', error);
+    (error)=>{
+        console.error('No se pudo cargar la textura de la Tierra:',error);
     }
 );
 
-// AJUSTAR TAMAÑO
-
-function ajustarPantalla() {
+/* AJUSTAR TAMAÑO */
+function ajustarPantalla(){
     const ancho = contenedor.clientWidth;
     const alto = contenedor.clientHeight;
 
-    if (!ancho || !alto) return;
+    if(!ancho || !alto) return;
 
-    camara.aspect = ancho / alto;
+    camara.aspect = ancho/alto;
     camara.updateProjectionMatrix();
 
-    renderizador.setSize(ancho, alto);
+    renderizador.setSize(ancho,alto);
 }
 
 const observador = new ResizeObserver(ajustarPantalla);
 observador.observe(contenedor);
 
 ajustarPantalla();
-
 </script>
 
 </body>
