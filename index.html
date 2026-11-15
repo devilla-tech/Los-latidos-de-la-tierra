@@ -24,7 +24,9 @@ body {
     font-family: 'Montserrat', sans-serif;
 }
 
-/* FONDO ESPACIAL */
+/* =========================
+   FONDO ESPACIAL Y AURORAS
+========================= */
 
 .fondo-aurora {
     position: fixed;
@@ -96,7 +98,9 @@ body {
     opacity: .5;
 }
 
-/* BOTÓN DEL MENÚ */
+/* =========================
+   BOTÓN MENÚ
+========================= */
 
 .menu-boton {
     position: fixed;
@@ -123,29 +127,20 @@ body {
     box-shadow: 0 0 18px #168bff88;
 }
 
-/* CONTENEDOR */
-
-.contenedor {
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    padding: 125px 15px 75px;
-    z-index: 1;
-}
-
-/* ENCABEZADO */
+/* =========================
+   ENCABEZADO CENTRADO
+========================= */
 
 header {
     position: absolute;
     top: 22px;
-    left: 85px;
-    right: 25px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    padding: 0 75px;
     text-align: center;
     z-index: 2;
+    pointer-events: none;
 }
 
 h1 {
@@ -164,7 +159,25 @@ header p {
     margin-top: 3px;
 }
 
-/* PLANETA */
+/* =========================
+   CONTENIDO PRINCIPAL
+========================= */
+
+.contenedor {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 110px 15px 75px;
+    z-index: 1;
+}
+
+/* =========================
+   TIERRA 3D
+========================= */
 
 #tierra {
     width: min(65vw, 520px);
@@ -180,7 +193,9 @@ header p {
     display: block;
 }
 
-/* BOTÓN INICIAR */
+/* =========================
+   BOTÓN INICIAR
+========================= */
 
 .boton-iniciar {
     margin-top: 12px;
@@ -209,7 +224,9 @@ header p {
     color: white;
 }
 
-/* MENÚ LATERAL */
+/* =========================
+   MENÚ LATERAL
+========================= */
 
 .overlay {
     position: fixed;
@@ -329,7 +346,9 @@ header p {
     margin: 25px 0;
 }
 
-/* FOOTER */
+/* =========================
+   FOOTER
+========================= */
 
 footer {
     position: absolute;
@@ -367,7 +386,9 @@ footer {
     color: #45baff;
 }
 
-/* RESPONSIVE */
+/* =========================
+   RESPONSIVE
+========================= */
 
 @media (max-width: 600px) {
 
@@ -380,13 +401,11 @@ footer {
 
     header {
         top: 17px;
-        left: 68px;
-        right: 10px;
-        text-align: center;
+        padding: 0 55px;
     }
 
     h1 {
-        font-size: clamp(25px, 6vw, 36px);
+        font-size: clamp(24px, 6vw, 36px);
         letter-spacing: 1px;
     }
 
@@ -548,7 +567,7 @@ footer {
 
 </aside>
 
-<!-- CONTENIDO -->
+<!-- CONTENIDO PRINCIPAL -->
 
 <div class="contenedor">
 
@@ -563,6 +582,8 @@ footer {
         <a href="main.html">INICIAR</a>
     </button>
 
+    <!-- FOOTER -->
+
     <footer>
         <div class="footer-contenido">
             <span class="footer-nombre">LOS LATIDOS DE LA TIERRA</span>
@@ -575,7 +596,7 @@ footer {
 
 </div>
 
-<!-- CONTROL DEL MENÚ -->
+<!-- FUNCIONAMIENTO DEL MENÚ -->
 
 <script>
 const abrirMenu = document.getElementById('abrirMenu');
@@ -604,7 +625,7 @@ document.addEventListener('keydown', (e) => {
 });
 </script>
 
-<!-- THREE.JS -->
+<!-- THREE.JS: TIERRA 3D -->
 
 <script type="module">
 import * as THREE from 'https://esm.sh/three@0.160.1';
@@ -696,7 +717,7 @@ cargador.load(
 
         planetaGrupo.add(atmosfera);
 
-        // ESTRELLAS
+        // ESTRELLAS 3D
 
         const posiciones = [];
 
