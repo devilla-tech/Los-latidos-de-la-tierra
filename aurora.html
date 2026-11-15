@@ -31,10 +31,57 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#05060d;col
  .zoom{bottom:12px}
  .zoom button{width:40px;height:40px}
 }
+
+ .language-selector{
+ position:fixed;
+ z-index:10;
+ left:clamp(10px,2vw,26px);
+ top:clamp(65px,7vw,76px);
+ display:flex;
+ gap:5px;
+ padding:5px;
+ border:1px solid rgba(120,150,190,.4);
+ border-radius:10px;
+ background:rgba(8,13,28,.85);
+ backdrop-filter:blur(8px);
+}
+
+.language-selector button{
+ padding:7px 12px;
+ border:1px solid transparent;
+ border-radius:7px;
+ background:transparent;
+ color:#dbe8ff;
+ font:inherit;
+ font-size:12px;
+ font-weight:700;
+ cursor:pointer;
+}
+
+.language-selector button.active{
+ background:rgba(45,105,125,.55);
+ border-color:#79e7cf;
+ color:#79e7cf;
+}
+
+.language-selector button:focus-visible{
+ outline:2px solid white;
+ outline-offset:3px;
+}
+
+@media(max-width:600px){
+ .language-selector{
+  top:10px;
+  left:10px;
+ }
+}
 </style>
 </head>
 <body>
-
+<div class="language-selector" role="group" aria-label="Selector de idioma">
+    <button type="button" id="btnES" class="active" aria-pressed="true">ES</button>
+    <button type="button" id="btnEN" aria-pressed="false">EN</button>
+</div>
 <div id="scene" aria-label="Planeta Tierra en tres dimensiones. Arrastra para girar y usa la rueda o los controles para acercar."></div>
 
 <div class="hint">Explora la Tierra: arrastra para girar, usa la rueda del mouse o los botones + y − para acercar. Activa un efecto para escuchar su sonificación.</div>
@@ -1629,6 +1676,206 @@ animate();
  'No se pudo cargar la experiencia 3D. Comprueba tu conexión a Internet y vuelve a cargar la página.<br>'+
  '<small>'+String(e.message||e)+'</small></div>';
 }
+</script>
+ <script>
+/* =========================================
+   SISTEMA DE IDIOMAS ESPAÑOL / INGLÉS
+========================================= */
+
+const translations = {
+
+    es: {
+        pageTitle: "Los latidos de la Tierra | Experiencia 3D",
+
+        languageSelector: "Selector de idioma",
+        planetDescription: "Planeta Tierra en tres dimensiones. Arrastra para girar y usa la rueda o los controles para acercar.",
+
+        hint: "Explora la Tierra: arrastra para girar, usa la rueda del mouse o los botones + y − para acercar. Activa un efecto para escuchar su sonificación.",
+
+        effects: "Efectos del planeta",
+
+        aurora: "Aurora boreal",
+        water: "Olas del mar",
+        temperature: "Temperatura continental",
+        nox: "Óxidos de nitrógeno (NOₓ)",
+        rain: "Precipitación",
+
+        temperatureTitle: "Temperatura simulada",
+        noxTitle: "Focos ilustrativos de contaminación por óxidos de nitrógeno",
+        rainTitle: "Lluvia y nieve simuladas",
+
+        rainSpeed: "Rapidez de precipitación",
+
+        zoomControls: "Controles de zoom",
+        zoomIn: "Acercar",
+        zoomOut: "Alejar",
+
+        auroraDescription: "Activar o desactivar aurora boreal",
+        waterDescription: "Activar o desactivar las olas del mar",
+        temperatureDescription: "Activar o desactivar la temperatura continental",
+        noxDescription: "Activar o desactivar la visualización de óxidos de nitrógeno",
+        rainDescription: "Activar o desactivar la precipitación"
+    },
+
+    en: {
+        pageTitle: "The Heartbeats of Earth | 3D Experience",
+
+        languageSelector: "Language selector",
+        planetDescription: "Three-dimensional planet Earth. Drag to rotate and use the mouse wheel or controls to zoom.",
+
+        hint: "Explore Earth: drag to rotate, use the mouse wheel or the + and − buttons to zoom. Activate an effect to hear its sonification.",
+
+        effects: "Planet effects",
+
+        aurora: "Northern lights",
+        water: "Ocean waves",
+        temperature: "Continental temperature",
+        nox: "Nitrogen oxides (NOₓ)",
+        rain: "Precipitation",
+
+        temperatureTitle: "Simulated temperature",
+        noxTitle: "Illustrative nitrogen oxide pollution hotspots",
+        rainTitle: "Simulated rain and snow",
+
+        rainSpeed: "Precipitation speed",
+
+        zoomControls: "Zoom controls",
+        zoomIn: "Zoom in",
+        zoomOut: "Zoom out",
+
+        auroraDescription: "Enable or disable northern lights",
+        waterDescription: "Enable or disable ocean waves",
+        temperatureDescription: "Enable or disable continental temperature",
+        noxDescription: "Enable or disable nitrogen oxide visualization",
+        rainDescription: "Enable or disable precipitation"
+    }
+
+};
+
+/* Referencias a elementos */
+
+const languageES = document.getElementById("btnES");
+const languageEN = document.getElementById("btnEN");
+
+function changeLanguage(language) {
+
+    const t = translations[language];
+
+    if (!t) return;
+
+    /* Idioma general */
+
+    document.documentElement.lang = language;
+    document.title = t.pageTitle;
+
+    /* Selector */
+
+    document.querySelector(".language-selector")
+        .setAttribute("aria-label", t.languageSelector);
+
+    languageES.classList.toggle("active", language === "es");
+    languageEN.classList.toggle("active", language === "en");
+
+    languageES.setAttribute("aria-pressed", String(language === "es"));
+    languageEN.setAttribute("aria-pressed", String(language === "en"));
+
+    /* Descripción de la Tierra */
+
+    document.getElementById("scene")
+        .setAttribute("aria-label", t.planetDescription);
+
+    /* Instrucciones */
+
+    document.querySelector(".hint").textContent = t.hint;
+
+    /* Grupo de efectos */
+
+    document.querySelector(".effects")
+        .setAttribute("aria-label", t.effects);
+
+    /* Botones */
+
+    const effectButtons = [
+        ["toggle-aurora", t.aurora, t.auroraDescription],
+        ["toggle-water", t.water, t.waterDescription],
+        ["toggle-temperature", t.temperature, t.temperatureDescription],
+        ["toggle-nox", t.nox, t.noxDescription],
+        ["toggle-rain", t.rain, t.rainDescription]
+    ];
+
+    effectButtons.forEach(([id, text, description]) => {
+
+        const button = document.getElementById(id);
+
+        /* Cambiamos el texto sin eliminar la flecha */
+
+        button.firstChild.textContent = text + " ";
+
+        button.title = description;
+        button.setAttribute("aria-label", description);
+
+    });
+
+    /* Títulos específicos */
+
+    document.getElementById("toggle-temperature").title =
+        t.temperatureTitle;
+
+    document.getElementById("toggle-nox").title =
+        t.noxTitle;
+
+    document.getElementById("toggle-rain").title =
+        t.rainTitle;
+
+    /* Velocidad de precipitación */
+
+    const rainLabel = document.querySelector(".rain-speed");
+
+    rainLabel.querySelector("span").textContent = t.rainSpeed;
+
+    /* Controles de zoom */
+
+    document.querySelector(".zoom")
+        .setAttribute("aria-label", t.zoomControls);
+
+    document.getElementById("zoom-in")
+        .setAttribute("aria-label", t.zoomIn);
+
+    document.getElementById("zoom-out")
+        .setAttribute("aria-label", t.zoomOut);
+
+    /* Guardar idioma seleccionado */
+
+    try {
+        localStorage.setItem("idiomaTierra3D", language);
+    } catch (error) {
+        console.warn("No se pudo guardar el idioma.");
+    }
+
+}
+
+/* Eventos del selector */
+
+languageES.addEventListener("click", () => {
+    changeLanguage("es");
+});
+
+languageEN.addEventListener("click", () => {
+    changeLanguage("en");
+});
+
+/* Recuperar idioma guardado */
+
+let savedLanguage = "es";
+
+try {
+    savedLanguage = localStorage.getItem("idiomaTierra3D") || "es";
+} catch (error) {
+    savedLanguage = "es";
+}
+
+changeLanguage(savedLanguage);
+
 </script>
 </body>
 </html>
